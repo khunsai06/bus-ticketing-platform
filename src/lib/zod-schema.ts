@@ -1,6 +1,6 @@
 // Validation Schema 
 import { z } from "zod";
-export const passwdSchema = z.string()
+export const passwdValidationSchema = z.string()
     .min(8, 'Password must be at least 8 characters long')
     .refine(
         password => /[A-Z]/.test(password),
@@ -20,7 +20,7 @@ export const passwdSchema = z.string()
     );
 
 
-export const unameSchema = z
+export const unameValidationSchema = z
     .string()
     .trim()
     .min(4, {

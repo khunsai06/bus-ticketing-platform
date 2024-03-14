@@ -3,7 +3,7 @@ import { passwdCompare, tokenCreate } from "@/lib/auth";
 import { ClientErr, HttpErr, ServerErr } from "@/lib/errors";
 import prisma from "@/lib/prisma-client";
 import { delayer } from "@/lib/util";
-import { passwdSchema, unameSchema } from "@/lib/zod-schema";
+import { passwdValidationSchema, unameValidationSchema } from "@/lib/zod-schema";
 import { Prisma } from "@prisma/client";
 import { serialize } from "cookie";
 import type { NextApiRequest, NextApiResponse } from "next";
