@@ -2,20 +2,65 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model User {
-    id        String   @id @default(cuid())
-    uname     String   @unique
-    email     String   @unique
-    passwd    String
-    role      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+// model User {
+//    id        String   @id @default(cuid())
+//    uname     String   @unique
+//    email     String   @unique
+//    passwd    String
+//    role      String
+//    createdAt DateTime @default(now())
+//    updatedAt DateTime @updatedAt
+// }
+
+model Operator {
+  id   String @id @default(cuid())
+  name String @unique
+  trip Trip[]
+
+  @@map("operators")
+}
+
+model Trip {
+  id                String     @id @default(cuid())
+  title             String
+  departureLocation String
+  arrivalLocation   String
+  intermediateStops String?
+  distance          Float?
+  departureTime     DateTime
+  arrivalTime       DateTime
+  price             Decimal
+  additional        String?
+  status            TripStatus @default(IDLE)
+
+  operatorId String?
+  operator   Operator? @relation(fields: [operatorId], references: [id])
+  seats      Seat[]
+
+  @@map("trips")
+}
+
+enum TripStatus {
+  IDLE
+  LAUNCHED
+  WITHDRAWN
+}
+
+model Seat {
+  id          String  @id @default(cuid())
+  identifier  String
+  isAvailable Boolean @default(true)
+  additional  String?
+  tripId      String
+  trip        Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("seats")
 }

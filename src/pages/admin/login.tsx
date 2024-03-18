@@ -38,16 +38,16 @@ const Page: FC<any> = () => {
     }
   }, []);
 
-  const [alert, setAlert] = useState<string | undefined>();
-  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const hideAlert = () => {
-    setAlert(undefined);
+    setError(undefined);
   };
 
   const login = async (e: FormEvent) => {
     e.preventDefault();
-    setIsPending(true);
+    setIsLoading(true);
     const res = await fetch("/api/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -56,14 +56,14 @@ const Page: FC<any> = () => {
         passwd: passwdFieldValue,
       }),
     }).finally(() => {
-      setIsPending(false);
+      setIsLoading(false);
     });
     const parsed = await res.json();
     if (res.ok) {
       rt.push("/admin/dashboard");
       return;
     }
-    setAlert(parsed.message);
+    setError(parsed.message);
   };
 
   return (
@@ -76,10 +76,10 @@ const Page: FC<any> = () => {
           <h4 className="title is-5">Login as Administrator</h4>
           <hr />
           <form method="post" onSubmit={login}>
-            {alert && (
+            {error && (
               <div className="notification is-danger is-light">
                 <button className="delete" onClick={hideAlert} />
-                {alert}
+                {error}
               </div>
             )}
 
@@ -113,7 +113,7 @@ const Page: FC<any> = () => {
             <button
               className={concatenateStrings([
                 "button is-primary",
-                isPending ? "is-loading" : "",
+                isLoading ? "is-loading" : "",
               ])}
               disabled={!(unameFieldAttr.validity && passwdFieldAttr.validity)}
               style={{ fontFamily: "inherit", width: "100%" }}
