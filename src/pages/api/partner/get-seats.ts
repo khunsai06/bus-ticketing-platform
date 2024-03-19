@@ -1,5 +1,6 @@
+import { ClientErr } from "@/lib/errors";
 import prisma from "@/lib/prisma-client";
-import { handleErrorAndRespond } from "@/lib/util";
+import { handleErrorAndRespond, isString } from "@/lib/util";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -7,7 +8,16 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const trips = await prisma.trip.findMany({ orderBy: { id: "desc" } });
+    const { tripId } = req.query;
+    if (!isString(tripId)) {
+      throw new ClientErr(400, "Invalid request parameters.");
+    }
+    const trips = await prisma.seat.findMany({
+      where: { tripId },
+      orderBy: { id: "asc" },
+    });
+    console.log(trips);
+
     res.status(200).json(trips);
   } catch (error) {
     handleErrorAndRespond(error, res);

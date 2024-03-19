@@ -3,18 +3,37 @@ import prisma from "@/lib/prisma-client";
 import { Seat } from "@/lib/types";
 import { handleFetchResponse } from "@/lib/util";
 import { PartnerServices } from "@/services/partner";
-import { Prisma } from "@prisma/client";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import React, { type FC, useState } from "react";
+import React, { type FC, useState, useEffect } from "react";
 
 const TripDetails = ({
   seats,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [seatList, setSeatList] = useState<Seat[]>([]);
+
+  useEffect(() => {
+    setSeatList(seats);
+  }, []);
+
+  const reHydrateSeatList = async () => {
+    const res = await PartnerServices.SeatManager.getMany(seats[0].tripId);
+    await handleFetchResponse<Seat[]>(res, {
+      successCallBack: setSeatList,
+      errCallback: console.error,
+    });
+  };
+
   return (
     <div>
       <ul>
-        {seats.map((seat, index) => {
-          return <SeatItem key={index} seat={seat} />;
+        {seatList.map((seat, index) => {
+          return (
+            <SeatItem
+              key={index}
+              seat={seat}
+              reHydrateSeatList={reHydrateSeatList}
+            />
+          );
         })}
       </ul>
     </div>
@@ -34,18 +53,20 @@ export const getServerSideProps = (async (ctx) => {
   };
 }) satisfies GetServerSideProps<{ seats: Seat[] }>;
 
-const SeatItem: FC<{ seat: Seat }> = ({ seat }) => {
-  const [isAvailable, setIsAvailable] = useState(seat.isAvailable);
+const SeatItem: FC<{ seat: Seat; reHydrateSeatList: VoidFunction }> = ({
+  seat,
+  reHydrateSeatList,
+}) => {
   const seatAvailabilityToggler = async () => {
-    const operation = isAvailable ? XSeatOperation.LOCK : XSeatOperation.OPEN;
+    const operation = seat.isAvailable
+      ? XSeatOperation.LOCK
+      : XSeatOperation.OPEN;
     const res = await PartnerServices.SeatManager.xOperation(
       seat.id,
       operation
     );
     handleFetchResponse(res, {
-      successCallBack: () => {
-        setIsAvailable(!isAvailable);
-      },
+      successCallBack: reHydrateSeatList,
       errCallback: console.error,
     });
   };
@@ -53,9 +74,9 @@ const SeatItem: FC<{ seat: Seat }> = ({ seat }) => {
     <li>
       <p>
         Identifier: {seat.identifier} Status:{" "}
-        {isAvailable ? "FREE" : "RESERVED"}{" "}
+        {seat.isAvailable ? "FREE" : "RESERVED"}{" "}
         <button onClick={seatAvailabilityToggler}>
-          {isAvailable ? "Lock" : "Open"}
+          {seat.isAvailable ? "Lock" : "Open"}
         </button>{" "}
       </p>
     </li>

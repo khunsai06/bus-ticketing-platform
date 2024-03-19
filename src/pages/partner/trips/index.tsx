@@ -18,13 +18,16 @@ type TripFilterParams = {
 const TripsPage = ({
   trips,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const rt = useRouter();
   const [tripList, setTripList] = useState<Trips>([]);
   const [filter, setFilter] = useState<TripFilterParams>({
     status: "",
     departureLocation: "",
     arrivalLocation: "",
   });
+
+  useEffect(() => {
+    console.log(filter);
+  }, [filter]);
 
   useEffect(() => {
     setTripList(trips);
@@ -38,42 +41,14 @@ const TripsPage = ({
     });
   };
 
-  const removeTrip = async (id: string) => {
-    const res = await PartnerServices.TripManager.xOperation(
-      id,
-      XTripOperation.DELETE
-    );
-    await handleFetchResponse(res, {
-      successCallBack: reHydrateTripList,
-      errCallback: console.error,
-    });
-  };
-  const launchTrip = async (id: string) => {
-    let res = await PartnerServices.TripManager.xOperation(
-      id,
-      XTripOperation.LAUNCH
-    );
-    await handleFetchResponse(res, {
-      successCallBack: reHydrateTripList,
-      errCallback: console.error,
-    });
-  };
-
-  const withdrawTrip = async (id: string) => {
-    let res = await PartnerServices.TripManager.xOperation(
-      id,
-      XTripOperation.WITHDRAW
-    );
-    await handleFetchResponse(res, {
-      successCallBack: reHydrateTripList,
-      errCallback: console.error,
-    });
-  };
-
   return (
     <div>
       <Link href={"/partner/trips/entry"}>Add New Trip</Link>{" "}
-      <select name="">
+      <select
+        onChange={(e) => {
+          setFilter((prev) => ({ ...prev, status: e.target.value }));
+        }}
+      >
         <option value="">None</option>
         <option value="idle">Idle</option>
         <option value="launched">Launched</option>
@@ -86,9 +61,7 @@ const TripsPage = ({
             <TripItem
               key={index}
               trip={trip}
-              remove={removeTrip}
-              launch={launchTrip}
-              withdraw={withdrawTrip}
+              reHydrateTripList={reHydrateTripList}
             />
           );
         })}
@@ -107,18 +80,47 @@ export const getServerSideProps = (async () => {
 
 type TripItemProps = {
   trip: Trip;
-  remove: (id: string) => void;
-  launch: (id: string) => void;
-  withdraw: (id: string) => void;
+  reHydrateTripList: VoidFunction;
 };
 
-const TripItem: FC<TripItemProps> = ({ trip, remove, launch, withdraw }) => {
+const TripItem: FC<TripItemProps> = ({ trip, reHydrateTripList }) => {
   const rt = useRouter();
   const dt = trip.departureTime;
   const at = trip.arrivalTime;
 
   const edit = () => {
     rt.push(`/partner/trips/entry?ops=edit&id=${trip.id}`);
+  };
+  const remove = async (id: string) => {
+    const res = await PartnerServices.TripManager.xOperation(
+      id,
+      XTripOperation.DELETE
+    );
+    await handleFetchResponse(res, {
+      successCallBack: reHydrateTripList,
+      errCallback: console.error,
+    });
+  };
+  const launch = async (id: string) => {
+    let res = await PartnerServices.TripManager.xOperation(
+      id,
+      XTripOperation.LAUNCH
+    );
+    await handleFetchResponse(res, {
+      successCallBack: reHydrateTripList,
+      errCallback: console.error,
+    });
+  };
+
+  const withdraw = async (id: string) => {
+    let res = await PartnerServices.TripManager.xOperation(
+      id,
+      XTripOperation.WITHDRAW
+    );
+    await handleFetchResponse(res, {
+      successCallBack: reHydrateTripList,
+      errCallback: console.error,
+    });
   };
 
   return (

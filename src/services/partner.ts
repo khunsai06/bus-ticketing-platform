@@ -45,5 +45,8 @@ export namespace PartnerServices {
         method: HttpVerb.PATCH,
       });
     }
+    static async getMany(tripId: string) {
+      return fetch(`/api/partner/get-seats?tripId=${tripId}`);
+    }
   }
 }
