@@ -1,89 +1,83 @@
 import { XTripOperation } from "@/constants";
 import prisma from "@/lib/prisma-client";
-import {
-  getHourDifference,
-  formatDateForDisplay,
-  extractTimeForDisplay,
-} from "@/lib/util";
-import { Prisma } from "@prisma/client";
+import { PartnerServices } from "@/services/partner";
+import { Utilities, handleFetchResponse } from "@/lib/util";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next/types";
 import React, { type FC, useState, useEffect } from "react";
-import { TLSSocket } from "tls";
+import { Trip, Trips } from "@/lib/types";
+import { error } from "console";
+
+type TripFilterParams = {
+  status: string;
+  departureLocation: string;
+  arrivalLocation: string;
+};
 
 const TripsPage = ({
   trips,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const rt = useRouter();
-  const [tripList, setTripList] = useState(trips);
-  const [filter, setFilter] = useState(rt.query.filter as string);
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (filter !== "") {
-      params.set("filter", filter);
-    } else {
-      params.delete("filter");
-    }
-    const newUrl = `${window.location.pathname}${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
-    window.history.replaceState({}, "", newUrl);
-    if (filter === "idle") {
-      setTripList((prev) => trips.filter((t) => t.status === "IDLE"));
-    } else if (filter === "launched") {
-      setTripList((prev) => trips.filter((t) => t.status === "LAUNCHED"));
-    } else if (filter === "withdrawn") {
-      setTripList((prev) => trips.filter((t) => t.status === "WITHDRAWN"));
-    } else {
-      setTripList(trips);
-    }
-  }, [filter]);
+  const [tripList, setTripList] = useState<Trips>([]);
+  const [filter, setFilter] = useState<TripFilterParams>({
+    status: "",
+    departureLocation: "",
+    arrivalLocation: "",
+  });
 
-  const remove = (id: string) =>
-    xTripOperation(id, XTripOperation.delete).then((res) => {
-      if (res.ok) {
-        const newTrips = trips.filter((t) => t.id !== id);
-        setTripList(newTrips);
-      }
+  useEffect(() => {
+    setTripList(trips);
+  }, []);
+
+  const reHydrateTripList = async () => {
+    const res = await PartnerServices.TripManager.getMany();
+    await handleFetchResponse<Trips>(res, {
+      successCallBack: setTripList,
+      errCallback: console.error,
     });
-  const launch = (id: string) =>
-    xTripOperation(id, XTripOperation.launch).then((res) => {
-      if (res.ok) {
-        const newTrips = trips.map((t) => {
-          if (t.id === id) {
-            t.status = "LAUNCHED";
-          }
-          return t;
-        });
-        setTripList(newTrips);
-      }
+  };
+
+  const removeTrip = async (id: string) => {
+    const res = await PartnerServices.TripManager.xOperation(
+      id,
+      XTripOperation.DELETE
+    );
+    await handleFetchResponse(res, {
+      successCallBack: reHydrateTripList,
+      errCallback: console.error,
     });
-  const withdraw = (id: string) =>
-    xTripOperation(id, XTripOperation.withdraw).then((res) => {
-      if (res.ok) {
-        const newTrips = trips.map((t) => {
-          if (t.id === id) {
-            t.status = "WITHDRAWN";
-          }
-          return t;
-        });
-        setTripList(newTrips);
-      }
+  };
+  const launchTrip = async (id: string) => {
+    let res = await PartnerServices.TripManager.xOperation(
+      id,
+      XTripOperation.LAUNCH
+    );
+    await handleFetchResponse(res, {
+      successCallBack: reHydrateTripList,
+      errCallback: console.error,
     });
+  };
+
+  const withdrawTrip = async (id: string) => {
+    let res = await PartnerServices.TripManager.xOperation(
+      id,
+      XTripOperation.WITHDRAW
+    );
+    await handleFetchResponse(res, {
+      successCallBack: reHydrateTripList,
+      errCallback: console.error,
+    });
+  };
+
   return (
     <div>
       <Link href={"/partner/trips/entry"}>Add New Trip</Link>{" "}
-      <select
-        value={filter}
-        onChange={(e) => {
-          setFilter(e.target.value);
-        }}
-      >
+      <select name="">
         <option value="">None</option>
-        <option value="idle">idle</option>
-        <option value="launched">launched</option>
-        <option value="withdrawn">withdraw</option>
+        <option value="idle">Idle</option>
+        <option value="launched">Launched</option>
+        <option value="withdrawn">Withdraw</option>
       </select>
       <hr />
       <ol>
@@ -92,9 +86,9 @@ const TripsPage = ({
             <TripItem
               key={index}
               trip={trip}
-              remove={remove}
-              launch={launch}
-              withdraw={withdraw}
+              remove={removeTrip}
+              launch={launchTrip}
+              withdraw={withdrawTrip}
             />
           );
         })}
@@ -104,19 +98,6 @@ const TripsPage = ({
 };
 
 export default TripsPage;
-
-type PrismaReturnTrip = Prisma.PromiseReturnType<
-  typeof prisma.trip.findFirstOrThrow
->;
-type Trip = Omit<
-  PrismaReturnTrip,
-  "departureTime" | "arrivalTime" | "price"
-> & {
-  departureTime: string;
-  arrivalTime: string;
-  price: number;
-};
-type Trips = Trip[];
 
 export const getServerSideProps = (async () => {
   const result = await prisma.trip.findMany({ orderBy: { id: "desc" } });
@@ -133,26 +114,27 @@ type TripItemProps = {
 
 const TripItem: FC<TripItemProps> = ({ trip, remove, launch, withdraw }) => {
   const rt = useRouter();
-  const dt = new Date(trip.departureTime);
-  const at = new Date(trip.arrivalTime);
+  const dt = trip.departureTime;
+  const at = trip.arrivalTime;
 
   const edit = () => {
     rt.push(`/partner/trips/entry?ops=edit&id=${trip.id}`);
   };
+
   return (
     <li>
       <Link href={`/partner/trips/${trip.id}`}>
         <p>
-          {extractTimeForDisplay(dt)} - {trip.title}
+          {Utilities.Datetime.extractTimeForDisplay(dt)} - {trip.title}
         </p>
       </Link>
       <p>
         {trip.departureLocation} - {trip.arrivalLocation}
       </p>
-      <p>Departs: {formatDateForDisplay(dt)}</p>
+      <p>Departs: {}</p>
       <p>
-        Arrives: {formatDateForDisplay(at)} Duration:{" "}
-        {getHourDifference(dt, at)} Hours
+        Arrives: {Utilities.Datetime.formatDateForDisplay(at)} Duration:{" "}
+        {Utilities.Datetime.getHourDifference(dt, at)} Hours
       </p>
       <p>1 seat x {trip.price} MMK</p>
       <p>{trip.additional}</p>
@@ -164,22 +146,17 @@ const TripItem: FC<TripItemProps> = ({ trip, remove, launch, withdraw }) => {
           <button onClick={() => launch(trip.id)}>Launch</button>{" "}
         </div>
       )}
-
       {trip.status === "LAUNCHED" && (
-        <button onClick={() => withdraw(trip.id)}>withdraw</button>
+        <div>
+          <button onClick={() => withdraw(trip.id)}>Withdraw</button>
+        </div>
+      )}
+      {trip.status === "WITHDRAWN" && (
+        <div>
+          <button onClick={() => remove(trip.id)}>Delete</button>{" "}
+        </div>
       )}
       <hr />
     </li>
   );
-};
-
-const xTripOperation = (id: string, ops: XTripOperation) => {
-  const method = {
-    [XTripOperation.delete]: "DELETE",
-    [XTripOperation.launch]: "PATCH",
-    [XTripOperation.withdraw]: "PATCH",
-  }[ops];
-  return fetch(`/api/partner/x-trip-ops?id=${id}&ops=${ops.toString()}`, {
-    method,
-  });
 };

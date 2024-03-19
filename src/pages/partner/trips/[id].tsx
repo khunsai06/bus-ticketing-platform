@@ -1,10 +1,11 @@
 import { XSeatOperation } from "@/constants";
 import prisma from "@/lib/prisma-client";
+import { Seat } from "@/lib/types";
+import { handleFetchResponse } from "@/lib/util";
+import { PartnerServices } from "@/services/partner";
 import { Prisma } from "@prisma/client";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import React, { type FC, useState } from "react";
-
-type Seat = Prisma.PromiseReturnType<typeof prisma.seat.findUniqueOrThrow>;
 
 const TripDetails = ({
   seats,
@@ -33,20 +34,20 @@ export const getServerSideProps = (async (ctx) => {
   };
 }) satisfies GetServerSideProps<{ seats: Seat[] }>;
 
-const xSeatOperation = async (id: string, ops: XSeatOperation) => {
-  return await fetch(`/api/partner/x-seat-ops?id=${id}&ops=${ops.toString()}`, {
-    method: "PATCH",
-  });
-};
-
 const SeatItem: FC<{ seat: Seat }> = ({ seat }) => {
   const [isAvailable, setIsAvailable] = useState(seat.isAvailable);
   const seatAvailabilityToggler = async () => {
-    const operation = isAvailable ? XSeatOperation.lock : XSeatOperation.open;
-    const res = await xSeatOperation(seat.id, operation);
-    if (res.ok) {
-      setIsAvailable(!isAvailable);
-    }
+    const operation = isAvailable ? XSeatOperation.LOCK : XSeatOperation.OPEN;
+    const res = await PartnerServices.SeatManager.xOperation(
+      seat.id,
+      operation
+    );
+    handleFetchResponse(res, {
+      successCallBack: () => {
+        setIsAvailable(!isAvailable);
+      },
+      errCallback: console.error,
+    });
   };
   return (
     <li>
@@ -54,7 +55,7 @@ const SeatItem: FC<{ seat: Seat }> = ({ seat }) => {
         Identifier: {seat.identifier} Status:{" "}
         {isAvailable ? "FREE" : "RESERVED"}{" "}
         <button onClick={seatAvailabilityToggler}>
-          {isAvailable ? "LOCK" : "OPEN"}
+          {isAvailable ? "Lock" : "Open"}
         </button>{" "}
       </p>
     </li>

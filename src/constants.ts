@@ -7,14 +7,22 @@ export const enum Role {
 }
 
 export enum XSeatOperation {
-  lock = "lock",
-  open = "open",
+  LOCK = "LOCK",
+  OPEN = "OPEN",
 }
 
 export enum XTripOperation {
-  launch = "launch",
-  withdraw = "withdraw",
-  delete = "delete",
+  LAUNCH = "LAUNCH",
+  WITHDRAW = "WITHDRAW",
+  DELETE = "DELETE",
+}
+
+export enum HttpVerb {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT",
+  PATCH = "PATCH",
+  DELETE = "DELETE",
 }
 
 type HttpErrorCodes = {

@@ -1,10 +1,10 @@
-import { ClientErr } from "@/lib/errors";
+import { PartnerServices } from "@/services/partner";
 import prisma from "@/lib/prisma-client";
-import { isString, convertIsoToDatetimeLocal } from "@/lib/util";
-import { Prisma } from "@prisma/client";
+import { Utilities, handleFetchResponse, isString } from "@/lib/util";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React from "react";
+import { Trip } from "@/lib/types";
 
 const NewTripFormPage = ({
   isEditMode,
@@ -19,10 +19,10 @@ const NewTripFormPage = ({
     ? trip!.intermediateStops ?? ""
     : "";
   const departureTimeFieldValue = isEditMode
-    ? convertIsoToDatetimeLocal(trip!.departureTime)
+    ? Utilities.Datetime.convertIsoToDatetimeLocal(trip!.departureTime)
     : "";
   const arrivalTimeFieldValue = isEditMode
-    ? convertIsoToDatetimeLocal(trip!.arrivalTime)
+    ? Utilities.Datetime.convertIsoToDatetimeLocal(trip!.arrivalTime)
     : "";
   const priceFieldValue = isEditMode ? Number(trip!.price) : 0;
   const additionalFieldValue = isEditMode ? trip!.additional ?? "" : "";
@@ -39,6 +39,7 @@ const NewTripFormPage = ({
     const price = Number(fd.get("price"));
     const seatCapacity = Number(fd.get("seatCapacity"));
     const additional = fd.get("additional");
+    const operatorId = "foo";
     const data = {
       title,
       departureLocation,
@@ -49,22 +50,18 @@ const NewTripFormPage = ({
       price,
       seatCapacity,
       additional,
+      operatorId,
     };
-    const editUrlSegment = isEditMode ? `?ops=edit&id=${trip!.id}` : "";
-    const method = isEditMode ? "PUT" : "POST";
-    const res = await fetch(`/api/partner/entry-trip${editUrlSegment}`, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    const parsed = await res.json();
-    if (res.ok) {
-      rt.push("/partner/trips");
+    let res: Response;
+    if (isEditMode) {
+      res = await PartnerServices.TripManager.update(trip!.id, data);
     } else {
-      alert(parsed.message);
+      res = await PartnerServices.TripManager.create(data);
     }
+    handleFetchResponse(res, {
+      successCallBack: () => rt.push("/partner/trips"),
+      errCallback: console.error,
+    });
   };
   return (
     <div className="hero is-fullheight p-5" onSubmit={handleSubmit}>
@@ -139,17 +136,6 @@ const NewTripFormPage = ({
 
 export default NewTripFormPage;
 
-type PrismaReturnTrip = Prisma.PromiseReturnType<
-  typeof prisma.trip.findFirstOrThrow
->;
-type Trip = Omit<
-  PrismaReturnTrip,
-  "departureTime" | "arrivalTime" | "price"
-> & {
-  departureTime: string;
-  arrivalTime: string;
-  price: number;
-};
 type Props = {
   isEditMode: boolean;
   trip?: Trip;

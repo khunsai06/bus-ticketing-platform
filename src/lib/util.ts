@@ -1,40 +1,57 @@
 import { httpErrorCodes } from "@/constants";
 import { ClientErr, ServerErr } from "./errors";
-import { Prisma } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next/types";
 import moment from "moment";
+import { boolean } from "zod";
 
-export function concatenateStrings(list: string[]): string {
-  return list.join(" ");
+export namespace Utilities {
+  export class Datetime {
+    static getHourDifference(startIsoString: string, endIsoString: string): number {
+      const startMoment = moment(startIsoString);
+      const endMoment = moment(endIsoString);
+      const hourDifference = endMoment.diff(startMoment, "hours");
+      return hourDifference;
+    }
+
+    static formatDateForDisplay(isoString: string): string {
+      return moment(isoString).format("MMM DD, hh:mm A");
+    }
+
+    static extractTimeForDisplay(isoString: string): string {
+      return moment(isoString).format("hh:mm A");
+    }
+
+    static convertIsoToDatetimeLocal(isoString: string) {
+      return moment(isoString).format("YYYY-MM-DDTHH:mm");
+    }
+  }
+  export function concatenateStrings(list: string[]): string {
+    return list.join(" ");
+  }
 }
 
-export function getHourDifference(startDate: Date, endDate: Date): number {
-  const startMoment = moment(startDate);
-  const endMoment = moment(endDate);
-  const hourDifference = endMoment.diff(startMoment, "hours");
-  return hourDifference;
-}
-
-export function formatDateForDisplay(date: Date): string {
-  return moment(date).format("MMM DD, hh:mm A");
-}
-
-export function extractTimeForDisplay(date: Date): string {
-  return moment(date).format("hh:mm A");
-}
-
-export function convertIsoToDatetimeLocal(isoString: string) {
-  return moment(isoString).format("YYYY-MM-DDTHH:mm");
-}
-
-export function validateRequestMethod(
-  req: NextApiRequest,
-  allowedMethods: string[]
-): void {
+export function validateRequestMethod(req: NextApiRequest, allowedMethods: string[]): void {
   const method = req.method?.toUpperCase();
   if (!method || !allowedMethods.includes(method)) {
     throw new ClientErr(405, `Method ${method} not allowed.`);
   }
+}
+
+type SuccessCallBack<T> = (data: T) => void;
+type ErrorCallBack = (errorMessage: string) => void;
+
+interface HandleFetchOptions<T> {
+  errCallback?: ErrorCallBack;
+  successCallBack?: SuccessCallBack<T>;
+}
+
+export async function handleFetchResponse<T>(res: Response, options?: HandleFetchOptions<T>) {
+  const { errCallback, successCallBack } = options || {};
+  const parsed = await res.json();
+  if (res.ok && successCallBack) successCallBack(parsed);
+  if (!res.ok && res.status >= 500) throw new Error(parsed.message);
+  if (!res.ok && res.status >= 400 && res.status < 500 && errCallback) errCallback(parsed.message);
+  return res.ok;
 }
 
 export function handleErrorAndRespond(error: unknown, res: NextApiResponse) {
