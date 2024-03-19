@@ -8,26 +8,25 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next/types";
 import React, { type FC, useState, useEffect } from "react";
 import { Trip, Trips } from "@/lib/types";
 import { error } from "console";
+import { TripStatus } from "@prisma/client";
+import moment from "moment";
 
 type TripFilterParams = {
-  status: string;
-  departureLocation: string;
-  arrivalLocation: string;
+  status?: string;
+  date?: moment.Moment;
+  dl?: string;
+  al?: string;
 };
 
 const TripsPage = ({
   trips,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [tripList, setTripList] = useState<Trips>([]);
-  const [filter, setFilter] = useState<TripFilterParams>({
-    status: "",
-    departureLocation: "",
-    arrivalLocation: "",
-  });
+  const [filterParams, setFilterParams] = useState<TripFilterParams>({});
 
   useEffect(() => {
-    console.log(filter);
-  }, [filter]);
+    reHydrateTripList();
+  }, [filterParams]);
 
   useEffect(() => {
     setTripList(trips);
@@ -36,7 +35,20 @@ const TripsPage = ({
   const reHydrateTripList = async () => {
     const res = await PartnerServices.TripManager.getMany();
     await handleFetchResponse<Trips>(res, {
-      successCallBack: setTripList,
+      successCallBack(data) {
+        const filtered = data.filter((trip) => {
+          const dt = moment(trip.departureTime);
+          console.log(filterParams);
+
+          return (
+            (!filterParams.status || trip.status === filterParams.status) &&
+            (!filterParams.date || dt.isSame(filterParams.date, "day")) &&
+            (!filterParams.dl || trip.departureLocation === filterParams.dl) &&
+            (!filterParams.al || trip.arrivalLocation === filterParams.al)
+          );
+        });
+        setTripList(filtered);
+      },
       errCallback: console.error,
     });
   };
@@ -46,14 +58,42 @@ const TripsPage = ({
       <Link href={"/partner/trips/entry"}>Add New Trip</Link>{" "}
       <select
         onChange={(e) => {
-          setFilter((prev) => ({ ...prev, status: e.target.value }));
+          setFilterParams((prev) => ({ ...prev, status: e.target.value }));
         }}
       >
-        <option value="">None</option>
-        <option value="idle">Idle</option>
-        <option value="launched">Launched</option>
-        <option value="withdrawn">Withdraw</option>
+        <option value={""}>None</option>
+        <option value={TripStatus.IDLE}>Idle</option>
+        <option value={TripStatus.LAUNCHED}>Launched</option>
+        <option value={TripStatus.WITHDRAWN}>Withdraw</option>
       </select>
+      <select
+        onChange={(e) => {
+          setFilterParams((prev) => ({ ...prev, dl: e.target.value }));
+        }}
+      >
+        <option value="Yangon">Yangon</option>
+        <option value="Mandalay">Mandalay</option>
+        <option value="Lashio">Lashio</option>
+      </select>
+      <select
+        onChange={(e) => {
+          setFilterParams((prev) => ({ ...prev, al: e.target.value }));
+        }}
+      >
+        <option value="Yangon">Yangon</option>
+        <option value="Mandalay">Mandalay</option>
+        <option value="Lashio">Lashio</option>
+      </select>
+      <input
+        type="date"
+        onChange={(e) => {
+          const dateValue = e.target.value;
+          setFilterParams((prev) => ({
+            ...prev,
+            date: dateValue ? moment(dateValue) : undefined,
+          }));
+        }}
+      />
       <hr />
       <ol>
         {tripList.map((trip, index) => {
@@ -133,7 +173,7 @@ const TripItem: FC<TripItemProps> = ({ trip, reHydrateTripList }) => {
       <p>
         {trip.departureLocation} - {trip.arrivalLocation}
       </p>
-      <p>Departs: {}</p>
+      <p>Departs: {Utilities.Datetime.formatDateForDisplay(dt)}</p>
       <p>
         Arrives: {Utilities.Datetime.formatDateForDisplay(at)} Duration:{" "}
         {Utilities.Datetime.getHourDifference(dt, at)} Hours
