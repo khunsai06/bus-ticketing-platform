@@ -71,6 +71,7 @@ const TripsPage = ({
           setFilterParams((prev) => ({ ...prev, dl: e.target.value }));
         }}
       >
+        <option value={""}>None</option>
         <option value="Yangon">Yangon</option>
         <option value="Mandalay">Mandalay</option>
         <option value="Lashio">Lashio</option>
@@ -80,6 +81,7 @@ const TripsPage = ({
           setFilterParams((prev) => ({ ...prev, al: e.target.value }));
         }}
       >
+        <option value={""}>None</option>
         <option value="Yangon">Yangon</option>
         <option value="Mandalay">Mandalay</option>
         <option value="Lashio">Lashio</option>
