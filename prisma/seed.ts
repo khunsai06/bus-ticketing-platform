@@ -1,25 +1,31 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 async function main() {
-    await prisma.user.deleteMany();
-    const passwd = await bcrypt.hash("qwerqwerQ1!", 10);
-    await prisma.user.create({
-        data: {
-            uname: "johndoe.admin",
-            email: "johndoe.admin@example.com",
-            passwd,
-            role: "ADMIN",
-        },
-    });
+  await prisma.partner.deleteMany();
+  await prisma.credential.deleteMany();
+  await prisma.operator.deleteMany();
+  const passwd = await bcrypt.hash("sixtyNine69)^", 10);
+  const operator = await prisma.operator.create({
+    data: { name: "foo", registrationEmail: "foo@outlook.com" },
+  });
+  const credential = await prisma.credential.create({
+    data: { uname: "johndoe", passwd, userType: "PARTNER" },
+  });
+  await prisma.partner.create({
+    data: {
+      cid: credential.id,
+      operatorId: operator.id,
+    },
+  });
 }
 main()
-    .then(async () => {
-        await prisma.$disconnect();
-    })
-    .catch(async (e) => {
-        console.error(e);
-        await prisma.$disconnect();
-        process.exit(1);
-    });
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

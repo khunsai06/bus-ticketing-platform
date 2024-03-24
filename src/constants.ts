@@ -1,11 +1,5 @@
 export const iconSize = 0.8;
 
-export const enum Role {
-  ADMIN = "ADMIN",
-  PARTNER = "PARTNER",
-  CONSUMER = "CONSUMER",
-}
-
 export enum XSeatOperation {
   LOCK = "LOCK",
   OPEN = "OPEN",

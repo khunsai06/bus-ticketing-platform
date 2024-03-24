@@ -1,7 +1,7 @@
 import { XSeatOperation } from "@/constants";
 import prisma from "@/lib/prisma-client";
 import { Seat } from "@/lib/types";
-import { handleFetchResponse } from "@/lib/util";
+import { UtilLib } from "@/lib/util";
 import { PartnerServices } from "@/services/partner";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import React, { type FC, useState, useEffect } from "react";
@@ -17,7 +17,7 @@ const TripDetails = ({
 
   const reHydrateSeatList = async () => {
     const res = await PartnerServices.SeatManager.getMany(seats[0].tripId);
-    await handleFetchResponse<Seat[]>(res, {
+    UtilLib.handleFetchResponse<Seat[]>(res, {
       successCallBack: setSeatList,
       errCallback: console.error,
     });
@@ -65,7 +65,7 @@ const SeatItem: FC<{ seat: Seat; reHydrateSeatList: VoidFunction }> = ({
       seat.id,
       operation
     );
-    handleFetchResponse(res, {
+    UtilLib.handleFetchResponse(res, {
       successCallBack: reHydrateSeatList,
       errCallback: console.error,
     });

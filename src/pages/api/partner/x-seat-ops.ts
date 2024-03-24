@@ -1,11 +1,8 @@
 import { HttpVerb, XSeatOperation } from "@/constants";
 import { ClientErr } from "@/lib/errors";
+import { isString } from "@/lib/guards";
 import prisma from "@/lib/prisma-client";
-import {
-  handleErrorAndRespond,
-  isString,
-  validateRequestMethod,
-} from "@/lib/util";
+import { UtilLib } from "@/lib/util";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -14,10 +11,13 @@ export default async function handler(
 ) {
   try {
     const allowedMethods = [HttpVerb.PATCH];
-    validateRequestMethod(req, allowedMethods);
+    UtilLib.validateRequestMethod(req, allowedMethods);
     const { id, ops } = req.query;
     if (!isString(id) || !isString(ops)) {
-      throw new ClientErr(400, "Invalid request parameters.");
+      throw new ClientErr(
+        400,
+        "Invalid or missing request query parameter(s): [id, ops]"
+      );
     }
     const validOps = Object.values(XSeatOperation);
     if (!validOps.includes(ops as XSeatOperation)) {
@@ -32,7 +32,7 @@ export default async function handler(
       .status(200)
       .json({ message: `Seat ${ops.toLowerCase()} operation success.` });
   } catch (error) {
-    handleErrorAndRespond(error, res);
+    UtilLib.handleErrorAndRespond(error, res);
   }
   res.status(500).json({
     message: "Unexpected issue. Unable to determine the problem.",

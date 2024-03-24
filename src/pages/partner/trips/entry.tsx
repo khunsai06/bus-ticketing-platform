@@ -1,10 +1,13 @@
 import { PartnerServices } from "@/services/partner";
 import prisma from "@/lib/prisma-client";
-import { Utilities, handleFetchResponse, isString } from "@/lib/util";
+import { UtilLib } from "@/lib/util";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Trip } from "@/lib/types";
+import { isString } from "@/lib/guards";
+import { getCookie, hasCookie } from "cookies-next";
+import { DatetimeLib } from "@/lib/datetime";
 
 const NewTripFormPage = ({
   isEditMode,
@@ -19,16 +22,20 @@ const NewTripFormPage = ({
     ? trip!.intermediateStops ?? ""
     : "";
   const departureTimeFieldValue = isEditMode
-    ? Utilities.Datetime.convertIsoToDatetimeLocal(trip!.departureTime)
+    ? DatetimeLib.convertIsoToDatetimeLocal(trip!.departureTime)
     : "";
   const arrivalTimeFieldValue = isEditMode
-    ? Utilities.Datetime.convertIsoToDatetimeLocal(trip!.arrivalTime)
+    ? DatetimeLib.convertIsoToDatetimeLocal(trip!.arrivalTime)
     : "";
   const priceFieldValue = isEditMode ? Number(trip!.price) : 0;
   const additionalFieldValue = isEditMode ? trip!.additional ?? "" : "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasCookie("operatorId")) {
+      throw new Error("Missing 'operatorId' cookie for data entry.");
+    }
+    const operatorId = getCookie("operatorId");
     const fd = new FormData(e.target as HTMLFormElement);
     const title = fd.get("title");
     const departureLocation = fd.get("departureLocation");
@@ -39,7 +46,6 @@ const NewTripFormPage = ({
     const price = Number(fd.get("price"));
     const seatCapacity = Number(fd.get("seatCapacity"));
     const additional = fd.get("additional");
-    const operatorId = "foo";
     const data = {
       title,
       departureLocation,
@@ -58,7 +64,7 @@ const NewTripFormPage = ({
     } else {
       res = await PartnerServices.TripManager.create(data);
     }
-    handleFetchResponse(res, {
+    UtilLib.handleFetchResponse(res, {
       successCallBack: () => rt.push("/partner/trips"),
       errCallback: console.error,
     });
@@ -142,18 +148,19 @@ type Props = {
   seatCapacity?: number;
 };
 
-export const getServerSideProps = (async (ctx) => {
-  const isEditMode = ctx.query.ops === "edit" && isString(ctx.query.id);
+export const getServerSideProps = (async ({ query }) => {
+  const isEditMode = query.ops === "edit";
+  const id = query.id;
+  if (isEditMode && !isString(id))
+    throw new Error("Invalid or missing request query parameter(s): [id].");
   let props: Props = { isEditMode };
-  if (isEditMode) {
-    const prismaReturnTrip = await prisma.trip.findUniqueOrThrow({
-      where: { id: ctx.query.id as string },
+  if (isEditMode && isString(id)) {
+    const result = await prisma.trip.findUniqueOrThrow({
+      where: { id },
       include: { seats: true },
     });
-    props.trip = JSON.parse(JSON.stringify(prismaReturnTrip)) as Trip;
-    props.seatCapacity = prismaReturnTrip.seats.length;
+    props.trip = JSON.parse(JSON.stringify(result)) as Trip;
+    props.seatCapacity = result.seats.length;
   }
-  return {
-    props,
-  };
+  return { props };
 }) satisfies GetServerSideProps<Props>;

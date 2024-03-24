@@ -13,8 +13,8 @@ export namespace PartnerServices {
       });
     }
 
-    static async update(tripId: string, payload: any) {
-      return fetch(`/api/partner/entry-trip?id=${tripId}`, {
+    static async update(id: string, payload: any) {
+      return fetch(`/api/partner/entry-trip?id=${id}`, {
         method: HttpVerb.PUT,
         headers: {
           "Content-Type": "application/json",
@@ -34,8 +34,8 @@ export namespace PartnerServices {
       });
     }
 
-    static async getMany() {
-      return fetch("/api/partner/get-trips");
+    static async getMany(operatorId: string) {
+      return fetch(`/api/partner/get-trips?operatorId=${operatorId}`);
     }
   }
 

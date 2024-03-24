@@ -1,7 +1,15 @@
 import { SignJWT, jwtVerify, decodeJwt, type JWTPayload } from "jose";
-import bcrypt from "bcrypt";
 import { ClientErr, ServerErr } from "./errors";
-import { JWTPayload2 } from "./types";
+import bcrypt from "bcryptjs";
+import { $Enums } from "@prisma/client";
+
+type JWTPayload2 = {
+  cid: string;
+  uname: string;
+  userType: $Enums.UserType;
+  email?: string;
+  operatorId?: string;
+} & JWTPayload;
 
 export namespace AuthLib {
   export async function passwdHash(passwd: string): Promise<string> {
@@ -32,9 +40,7 @@ export namespace AuthLib {
       throw error;
     }
   }
-
   export async function tokenCreate(payload: JWTPayload2): Promise<string> {
-    const { id, others } = payload;
     const jti = crypto.randomUUID();
     if (!process.env.SECRET) {
       throw new ServerErr(
@@ -43,9 +49,9 @@ export namespace AuthLib {
       );
     }
     try {
-      return await new SignJWT(others as JWTPayload)
+      return await new SignJWT(payload)
         .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-        .setSubject(id)
+        .setSubject(payload.cid)
         .setIssuedAt()
         .setExpirationTime("30 minutes from now")
         .setJti(jti)

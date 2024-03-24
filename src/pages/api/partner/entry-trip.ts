@@ -1,9 +1,14 @@
 import { ClientErr } from "@/lib/errors";
+import { isString } from "@/lib/guards";
 import prisma from "@/lib/prisma-client";
-import { handleErrorAndRespond, isString, validateRequestMethod } from "@/lib/util";
+import { TripEntryPayload } from "@/lib/types";
+import { UtilLib } from "@/lib/util";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
     if (req.query.id) {
       processTripUpdateRequest(req);
@@ -13,36 +18,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(200).json({ message: "Trip and seats successfully created" });
     }
   } catch (error) {
-    handleErrorAndRespond(error, res);
+    UtilLib.handleErrorAndRespond(error, res);
   }
   res.status(500).json({
     message: "Unexpected issue. Unable to determine the problem.",
   });
 }
 
-interface Payload {
-  title: string;
-  departureLocation: string;
-  arrivalLocation: string;
-  intermediateStops: string;
-  departureTime: string;
-  arrivalTime: string;
-  price: number;
-  additional: string;
-  seatCapacity: number;
-  operatorId: string;
-}
-
-function isExpectedPayload(body: any): body is Payload {
+function isExpectedPayload(body: any): body is TripEntryPayload {
   if (
     typeof body.title !== "string" ||
     typeof body.departureLocation !== "string" ||
     typeof body.arrivalLocation !== "string" ||
-    typeof body.intermediateStops !== "string" ||
+    (body.intermediateStops && typeof body.intermediateStops !== "string") ||
     typeof body.departureTime !== "string" ||
     typeof body.arrivalTime !== "string" ||
     typeof body.price !== "number" ||
-    typeof body.additional !== "string" ||
+    (body.additional && typeof body.additional !== "string") ||
     typeof body.seatCapacity !== "number" ||
     typeof body.operatorId !== "string"
   ) {
@@ -53,7 +45,7 @@ function isExpectedPayload(body: any): body is Payload {
 
 async function processTripCreateRequest(req: NextApiRequest) {
   const allowedMethods = ["POST"];
-  validateRequestMethod(req, allowedMethods);
+  UtilLib.validateRequestMethod(req, allowedMethods);
   if (!isExpectedPayload(req.body)) {
     throw new ClientErr(400, "Invalid or missing request body");
   }
@@ -63,10 +55,13 @@ async function processTripCreateRequest(req: NextApiRequest) {
 
 async function processTripUpdateRequest(req: NextApiRequest) {
   const allowedMethods = ["PUT"];
-  validateRequestMethod(req, allowedMethods);
+  UtilLib.validateRequestMethod(req, allowedMethods);
   const { id } = req.query;
   if (!isString(id)) {
-    throw new ClientErr(400, "Invalid or missing query parameter 'id'.");
+    throw new ClientErr(
+      400,
+      "Invalid or missing request query parameter(s): [id]."
+    );
   }
   if (!isExpectedPayload(req.body)) {
     throw new ClientErr(400, "Invalid or missing request body.");
@@ -76,7 +71,7 @@ async function processTripUpdateRequest(req: NextApiRequest) {
   await generateSeats(tripId, req.body.seatCapacity);
 }
 
-async function createTrip(payload: Payload) {
+async function createTrip(payload: TripEntryPayload) {
   const { departureTime, arrivalTime, seatCapacity, ...others } = payload;
   const trip = await prisma.trip.create({
     data: {
@@ -88,7 +83,7 @@ async function createTrip(payload: Payload) {
   return trip.id;
 }
 
-async function updateTrip(id: string, payload: Payload) {
+async function updateTrip(id: string, payload: TripEntryPayload) {
   const { departureTime, arrivalTime, seatCapacity, ...others } = payload;
   const trip = await prisma.trip.update({
     where: { id },
