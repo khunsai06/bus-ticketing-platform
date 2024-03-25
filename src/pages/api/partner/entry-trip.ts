@@ -1,3 +1,4 @@
+import { HttpVerb } from "@/constants";
 import { ClientErr } from "@/lib/errors";
 import { isString } from "@/lib/guards";
 import prisma from "@/lib/prisma-client";
@@ -11,9 +12,11 @@ export default async function handler(
 ) {
   try {
     if (req.query.id) {
+      UtilLib.validateRequestMethod(req, [HttpVerb.PUT]);
       processTripUpdateRequest(req);
       res.status(200).json({ message: "Trip and seats successfully updated" });
     } else {
+      UtilLib.validateRequestMethod(req, [HttpVerb.POST]);
       processTripCreateRequest(req);
       res.status(200).json({ message: "Trip and seats successfully created" });
     }
@@ -26,74 +29,60 @@ export default async function handler(
 }
 
 function isExpectedPayload(body: any): body is TripEntryPayload {
-  if (
-    typeof body.title !== "string" ||
-    typeof body.departureLocation !== "string" ||
-    typeof body.arrivalLocation !== "string" ||
-    (body.intermediateStops && typeof body.intermediateStops !== "string") ||
-    typeof body.departureTime !== "string" ||
-    typeof body.arrivalTime !== "string" ||
-    typeof body.price !== "number" ||
-    (body.additional && typeof body.additional !== "string") ||
-    typeof body.seatCapacity !== "number" ||
-    typeof body.operatorId !== "string"
-  ) {
-    return false;
-  }
-  return true;
+  return (
+    typeof body.title === "string" &&
+    typeof body.departureLocation === "string" &&
+    typeof body.arrivalLocation === "string" &&
+    typeof body.intermediateStops === "string" &&
+    typeof body.departureTime === "string" &&
+    typeof body.arrivalTime === "string" &&
+    typeof body.distance === "number" &&
+    typeof body.price === "number" &&
+    typeof body.additional === "string"
+  );
 }
 
 async function processTripCreateRequest(req: NextApiRequest) {
-  const allowedMethods = ["POST"];
-  UtilLib.validateRequestMethod(req, allowedMethods);
-  if (!isExpectedPayload(req.body)) {
-    throw new ClientErr(400, "Invalid or missing request body");
+  const payload = req.body;
+  const operatorId = req.query.operatorId;
+  if (!isExpectedPayload(payload)) {
+    throw new ClientErr(400, "Invalid or missing request body.");
   }
-  const tripId = await createTrip(req.body);
-  await generateSeats(tripId, req.body.seatCapacity);
+  if (!isString(operatorId)) {
+    throw new ClientErr(
+      400,
+      "Invalid or missing request query parameter(s): [operatorId]."
+    );
+  }
+  const { departureTime, arrivalTime, ...args } = payload;
+  const data = {
+    departureTime: new Date(departureTime),
+    arrivalTime: new Date(arrivalTime),
+    ...args,
+    operatorId,
+  };
+  return prisma.trip.create({ data });
 }
 
 async function processTripUpdateRequest(req: NextApiRequest) {
-  const allowedMethods = ["PUT"];
-  UtilLib.validateRequestMethod(req, allowedMethods);
-  const { id } = req.query;
+  const payload = req.body;
+  const id = req.query.id;
+  if (!isExpectedPayload(payload)) {
+    throw new ClientErr(400, "Invalid or missing request body.");
+  }
   if (!isString(id)) {
     throw new ClientErr(
       400,
       "Invalid or missing request query parameter(s): [id]."
     );
   }
-  if (!isExpectedPayload(req.body)) {
-    throw new ClientErr(400, "Invalid or missing request body.");
-  }
-  const tripId = await updateTrip(id, req.body);
-  await prisma.seat.deleteMany({ where: { tripId } });
-  await generateSeats(tripId, req.body.seatCapacity);
-}
-
-async function createTrip(payload: TripEntryPayload) {
-  const { departureTime, arrivalTime, seatCapacity, ...others } = payload;
-  const trip = await prisma.trip.create({
-    data: {
-      ...others,
-      departureTime: new Date(departureTime),
-      arrivalTime: new Date(arrivalTime),
-    },
-  });
-  return trip.id;
-}
-
-async function updateTrip(id: string, payload: TripEntryPayload) {
-  const { departureTime, arrivalTime, seatCapacity, ...others } = payload;
-  const trip = await prisma.trip.update({
-    where: { id },
-    data: {
-      ...others,
-      departureTime: new Date(departureTime),
-      arrivalTime: new Date(arrivalTime),
-    },
-  });
-  return trip.id;
+  const { departureTime, arrivalTime, ...args } = payload;
+  const data = {
+    departureTime: new Date(departureTime),
+    arrivalTime: new Date(arrivalTime),
+    ...args,
+  };
+  return prisma.trip.update({ where: { id }, data });
 }
 
 async function generateSeats(tripId: string, seatCapacity: number) {

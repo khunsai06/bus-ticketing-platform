@@ -1,6 +1,6 @@
 import { XSeatOperation } from "@/constants";
 import prisma from "@/lib/prisma-client";
-import { Seat } from "@/lib/types";
+import { Seat2 } from "@/lib/types";
 import { UtilLib } from "@/lib/util";
 import { PartnerServices } from "@/services/partner";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -9,7 +9,7 @@ import React, { type FC, useState, useEffect } from "react";
 const TripDetails = ({
   seats,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [seatList, setSeatList] = useState<Seat[]>([]);
+  const [seatList, setSeatList] = useState<Seat2[]>([]);
 
   useEffect(() => {
     setSeatList(seats);
@@ -17,7 +17,7 @@ const TripDetails = ({
 
   const reHydrateSeatList = async () => {
     const res = await PartnerServices.SeatManager.getMany(seats[0].tripId);
-    UtilLib.handleFetchResponse<Seat[]>(res, {
+    UtilLib.handleFetchResponse<Seat2[]>(res, {
       successCallBack: setSeatList,
       errCallback: console.error,
     });
@@ -51,9 +51,9 @@ export const getServerSideProps = (async (ctx) => {
   return {
     props: { seats },
   };
-}) satisfies GetServerSideProps<{ seats: Seat[] }>;
+}) satisfies GetServerSideProps<{ seats: Seat2[] }>;
 
-const SeatItem: FC<{ seat: Seat; reHydrateSeatList: VoidFunction }> = ({
+const SeatItem: FC<{ seat: Seat2; reHydrateSeatList: VoidFunction }> = ({
   seat,
   reHydrateSeatList,
 }) => {

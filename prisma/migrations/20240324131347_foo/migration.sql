@@ -47,8 +47,7 @@ CREATE TABLE "operators" (
     "registrationEmail" TEXT NOT NULL,
     "logo" BYTEA,
     "background" TEXT,
-    "supportEmails" TEXT[],
-    "supportPhoneNumbers" TEXT[],
+    "supportContacts" TEXT[],
 
     CONSTRAINT "operators_pkey" PRIMARY KEY ("id")
 );

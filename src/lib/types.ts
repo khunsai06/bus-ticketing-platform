@@ -1,21 +1,12 @@
-import { Prisma } from "@prisma/client";
-import prisma from "./prisma-client";
+import { type Seat, Trip } from "@prisma/client";
 
-type PrismaReturnTrip = Prisma.PromiseReturnType<
-  typeof prisma.trip.findFirstOrThrow
->;
-export type Trip = Omit<
-  PrismaReturnTrip,
-  "departureTime" | "arrivalTime" | "price"
-> & {
+export type Trip2 = Omit<Trip, "departureTime" | "arrivalTime" | "price"> & {
   departureTime: string;
   arrivalTime: string;
   price: number;
 };
 
-export type Seat = Prisma.PromiseReturnType<
-  typeof prisma.seat.findUniqueOrThrow
->;
+export type Seat2 = Seat;
 
 export type CredentialPayload = {
   uname?: string;
@@ -23,15 +14,14 @@ export type CredentialPayload = {
   passwd: string;
 };
 
-export type TripEntryPayload = {
+export interface TripEntryPayload {
   title: string;
   departureLocation: string;
   arrivalLocation: string;
-  intermediateStops?: string;
+  intermediateStops: string;
   departureTime: string;
   arrivalTime: string;
+  distance: number;
   price: number;
-  additional?: string;
-  seatCapacity: number;
-  operatorId: string;
-};
+  additional: string;
+}

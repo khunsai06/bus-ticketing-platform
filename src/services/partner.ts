@@ -1,10 +1,10 @@
 import { HttpVerb, XSeatOperation, XTripOperation } from "@/constants";
-import { type Trip } from "@/lib/types";
+import { type Trip2 } from "@/lib/types";
 
 export namespace PartnerServices {
   export class TripManager {
-    static async create(payload: any) {
-      return fetch("/api/partner/entry-trip", {
+    static async create(operatorId: string, payload: any) {
+      return fetch(`/api/partner/entry-trip?operatorId=${operatorId}`, {
         method: HttpVerb.POST,
         headers: {
           "Content-Type": "application/json",
@@ -12,7 +12,6 @@ export namespace PartnerServices {
         body: JSON.stringify(payload),
       });
     }
-
     static async update(id: string, payload: any) {
       return fetch(`/api/partner/entry-trip?id=${id}`, {
         method: HttpVerb.PUT,
@@ -22,7 +21,6 @@ export namespace PartnerServices {
         body: JSON.stringify(payload),
       });
     }
-
     static async xOperation(id: string, ops: XTripOperation) {
       const method = {
         [XTripOperation.DELETE]: HttpVerb.DELETE,
@@ -33,7 +31,6 @@ export namespace PartnerServices {
         method,
       });
     }
-
     static async getMany(operatorId: string) {
       return fetch(`/api/partner/get-trips?operatorId=${operatorId}`);
     }
@@ -47,6 +44,18 @@ export namespace PartnerServices {
     }
     static async getMany(tripId: string) {
       return fetch(`/api/partner/get-seats?tripId=${tripId}`);
+    }
+  }
+
+  export class ContactManger {
+    static async create(operatorId: string, payload: any) {
+      return fetch(`/api/partner/entry-contact?operatorId=${operatorId}`, {
+        method: HttpVerb.PUT,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
     }
   }
 }

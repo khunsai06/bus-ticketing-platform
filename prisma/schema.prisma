@@ -52,15 +52,14 @@ model Partner {
 }
 
 model Operator {
-  id                  String    @id @default(cuid())
-  name                String    @unique
-  registrationEmail   String    @unique
-  logo                Bytes?    @db.ByteA
-  background          String?
-  supportEmails       String[]
-  supportPhoneNumbers String[]
-  associates          Partner[]
-  trips               Trip[]
+  id                String    @id @default(cuid())
+  name              String    @unique
+  registrationEmail String    @unique
+  logo              Bytes?    @db.ByteA
+  background        String?
+  supportContacts   String[]
+  associates        Partner[]
+  trips             Trip[]
 
   @@map("operators")
 }

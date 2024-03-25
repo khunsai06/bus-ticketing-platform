@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next/types";
 import React, { type FC, useState, useEffect } from "react";
-import { Trip } from "@/lib/types";
+import { Trip2 } from "@/lib/types";
 import { TripStatus } from "@prisma/client";
 import moment from "moment";
 import { DatetimeLib } from "@/lib/datetime";
@@ -22,7 +22,7 @@ type TripFilterParams = {
 const TripsPage = ({
   trips,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [tripList, setTripList] = useState<Trip[]>(trips);
+  const [tripList, setTripList] = useState<Trip2[]>(trips);
   const [filterParams, setFilterParams] = useState<TripFilterParams>({});
 
   useEffect(() => {
@@ -48,7 +48,7 @@ const TripsPage = ({
     const res = await PartnerServices.TripManager.getMany(
       getCookie("operatorId")!
     );
-    UtilLib.handleFetchResponse<Trip[]>(res, {
+    UtilLib.handleFetchResponse<Trip2[]>(res, {
       successCallBack(data) {
         const filtered = data.filter((trip) => {
           const dt = moment(trip.departureTime);
@@ -126,10 +126,10 @@ export const getServerSideProps = (async ({ req }) => {
     orderBy: { id: "desc" },
   });
   return { props: { trips: JSON.parse(JSON.stringify(result)) } };
-}) satisfies GetServerSideProps<{ trips: Trip[] }>;
+}) satisfies GetServerSideProps<{ trips: Trip2[] }>;
 
 type TripItemProps = {
-  trip: Trip;
+  trip: Trip2;
   reHydrateTripList: VoidFunction;
 };
 
