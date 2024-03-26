@@ -1,9 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { $Enums, PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 async function main() {
-  await prisma.partner.deleteMany();
+  await prisma.operatorPersonnel.deleteMany();
   await prisma.credential.deleteMany();
   await prisma.operator.deleteMany();
   const passwd = await bcrypt.hash("sixtyNine69)^", 10);
@@ -11,9 +11,9 @@ async function main() {
     data: { name: "foo", registrationEmail: "foo@outlook.com" },
   });
   const credential = await prisma.credential.create({
-    data: { uname: "johndoe", passwd, userType: "PARTNER" },
+    data: { uname: "johndoe", passwd, userType: $Enums.UserType.OPERATOR },
   });
-  await prisma.partner.create({
+  await prisma.operatorPersonnel.create({
     data: {
       cid: credential.id,
       operatorId: operator.id,

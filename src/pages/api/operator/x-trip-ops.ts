@@ -1,4 +1,4 @@
-import { HttpVerb, XTripOperation } from "@/constants";
+import { HttpVerb, XTripOps } from "@/constants";
 import { ClientErr } from "@/lib/errors";
 import { isString } from "@/lib/guards";
 import prisma from "@/lib/prisma-client";
@@ -20,21 +20,18 @@ export default async function handler(
         "Invalid or missing request query parameter(s): [id, ops]"
       );
     }
-    const validOps = Object.values(XTripOperation);
-    if (!validOps.includes(ops as XTripOperation)) {
+    const validOps = Object.values(XTripOps);
+    if (!validOps.includes(ops as XTripOps)) {
       throw new ClientErr(400, "Invalid operation provided.");
     }
-    if (req.method === HttpVerb.DELETE && ops === XTripOperation.DELETE) {
+    if (req.method === HttpVerb.DELETE && ops === XTripOps.DELETE) {
       await prisma.trip.delete({ where: { id } });
-    } else if (req.method === HttpVerb.PATCH && ops === XTripOperation.LAUNCH) {
+    } else if (req.method === HttpVerb.PATCH && ops === XTripOps.LAUNCH) {
       await prisma.trip.update({
         where: { id },
         data: { status: $Enums.TripStatus.LAUNCHED },
       });
-    } else if (
-      req.method === HttpVerb.PATCH &&
-      ops === XTripOperation.WITHDRAW
-    ) {
+    } else if (req.method === HttpVerb.PATCH && ops === XTripOps.WITHDRAW) {
       await prisma.trip.update({
         where: { id },
         data: { status: $Enums.TripStatus.WITHDRAWN },

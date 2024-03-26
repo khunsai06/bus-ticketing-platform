@@ -1,8 +1,8 @@
-import { XSeatOperation } from "@/constants";
+import { XSeatOps } from "@/constants";
 import prisma from "@/lib/prisma-client";
 import { Seat2 } from "@/lib/types";
 import { UtilLib } from "@/lib/util";
-import { PartnerServices } from "@/services/partner";
+import { OperatorServices } from "@/services/operator";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import React, { type FC, useState, useEffect } from "react";
 
@@ -16,7 +16,7 @@ const TripDetails = ({
   }, []);
 
   const reHydrateSeatList = async () => {
-    const res = await PartnerServices.SeatManager.getMany(seats[0].tripId);
+    const res = await OperatorServices.SeatManager.getMany(seats[0].tripId);
     UtilLib.handleFetchResponse<Seat2[]>(res, {
       successCallBack: setSeatList,
       errCallback: console.error,
@@ -58,10 +58,8 @@ const SeatItem: FC<{ seat: Seat2; reHydrateSeatList: VoidFunction }> = ({
   reHydrateSeatList,
 }) => {
   const seatAvailabilityToggler = async () => {
-    const operation = seat.isAvailable
-      ? XSeatOperation.LOCK
-      : XSeatOperation.OPEN;
-    const res = await PartnerServices.SeatManager.xOperation(
+    const operation = seat.isAvailable ? XSeatOps.LOCK : XSeatOps.OPEN;
+    const res = await OperatorServices.SeatManager.xOperation(
       seat.id,
       operation
     );

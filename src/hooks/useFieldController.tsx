@@ -8,7 +8,7 @@ type Params = {
   onError?: (e: ZodError) => void;
 };
 
-export default function useInputController({
+export default function useFieldController({
   initialValue,
   zodSchema,
   onError,
@@ -34,8 +34,9 @@ export default function useInputController({
     }
   }, [value, isFocus]);
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setValue(e.target.value.trim());
+  const onChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => setValue(e.target.value);
 
   const reset = () => {
     setValue("");
@@ -48,8 +49,10 @@ export default function useInputController({
 
   return {
     value,
+    isFocus,
     validity,
     message,
+    setValue,
     reset,
     onChange,
     onFocus,

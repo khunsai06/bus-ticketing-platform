@@ -22,4 +22,8 @@ export namespace DatetimeLib {
   export function convertIsoToDatetimeLocal(isoString: string) {
     return moment(isoString).format("YYYY-MM-DDTHH:mm");
   }
+
+  export function latestDate16YearsAgo() {
+    return moment().subtract(16, "years").format("YYYY-MM-DD");
+  }
 }

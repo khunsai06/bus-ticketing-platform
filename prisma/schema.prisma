@@ -13,52 +13,59 @@ datasource db {
 enum UserType {
   CONSUMER
   ADMIN
-  PARTNER
+  OPERATOR
 }
 
 model Credential {
-  id       String    @id @default(cuid())
-  uname    String    @unique
-  passwd   String
-  userType UserType
-  partner  Partner?
-  consumer Consumer?
-  admin    Admin?
+  id                String             @id @default(cuid())
+  uname             String?            @unique
+  email             String?            @unique
+  passwd            String
+  userType          UserType
+  operatorPersonnel OperatorPersonnel?
+  consumer          Consumer?
+  admin             Admin?
 
   @@map("credentials")
 }
 
 model Consumer {
-  id                String     @id @default(cuid())
-  cid               String     @unique
-  registrationEmail String     @unique
-  credential        Credential @relation(fields: [cid], references: [id])
+  id         String     @id @default(cuid())
+  name       String
+  dob        DateTime   @db.Date
+  gender     String
+  cid        String     @unique
+  credential Credential @relation(fields: [cid], references: [id])
+
+  @@map("consumers")
 }
 
 model Admin {
   id         String     @id @default(cuid())
   cid        String     @unique
   credential Credential @relation(fields: [cid], references: [id])
+
+  @@map("admins")
 }
 
-model Partner {
+model OperatorPersonnel {
   id         String     @id @default(cuid())
   cid        String     @unique
   credential Credential @relation(fields: [cid], references: [id])
   operatorId String
   operator   Operator   @relation(fields: [operatorId], references: [id])
 
-  @@map("partners")
+  @@map("operator_personnel")
 }
 
 model Operator {
-  id                String    @id @default(cuid())
-  name              String    @unique
-  registrationEmail String    @unique
-  logo              Bytes?    @db.ByteA
+  id                String              @id @default(cuid())
+  name              String              @unique
+  registrationEmail String              @unique
+  logo              Bytes?              @db.ByteA
   background        String?
   supportContacts   String[]
-  associates        Partner[]
+  associates        OperatorPersonnel[]
   trips             Trip[]
 
   @@map("operators")
@@ -73,7 +80,7 @@ model Trip {
   distance          Float?
   departureTime     DateTime
   arrivalTime       DateTime
-  price             Decimal
+  price             Decimal    @db.Money
   additional        String?
   status            TripStatus @default(IDLE)
 

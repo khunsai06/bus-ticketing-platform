@@ -1,16 +1,17 @@
-import { XTripOperation } from "@/constants";
+import { OPERATOR_SESSION_COOKIE_NAME, XTripOps } from "@/constants";
 import prisma from "@/lib/prisma-client";
-import { PartnerServices } from "@/services/partner";
+import { OperatorServices } from "@/services/operator";
 import { UtilLib } from "@/lib/util";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next/types";
 import React, { type FC, useState, useEffect } from "react";
 import { Trip2 } from "@/lib/types";
-import { TripStatus } from "@prisma/client";
+import { Trip, TripStatus } from "@prisma/client";
 import moment from "moment";
 import { DatetimeLib } from "@/lib/datetime";
 import { getCookie, hasCookie } from "cookies-next";
+import { AuthLib } from "@/lib/auth";
 
 type TripFilterParams = {
   status?: string;
@@ -45,7 +46,7 @@ const TripsPage = ({
     if (!hasCookie("operatorId")) {
       throw new Error("Missing 'operatorId' cookie for data retrieval.");
     }
-    const res = await PartnerServices.TripManager.getMany(
+    const res = await OperatorServices.TripManager.getMany(
       getCookie("operatorId")!
     );
     UtilLib.handleFetchResponse<Trip2[]>(res, {
@@ -77,7 +78,7 @@ const TripsPage = ({
 
   return (
     <div>
-      <Link href={"/partner/trips/entry"}>Add New Trip</Link>{" "}
+      <Link href={"/operator/trips/entry"}>Add New Trip</Link>{" "}
       <section>
         <select name="status" onChange={handleFilterChange}>
           <option value={""}>None</option>
@@ -118,11 +119,10 @@ const TripsPage = ({
 export default TripsPage;
 
 export const getServerSideProps = (async ({ req }) => {
-  const operatorId = getCookie("operatorId", { req });
-  if (!hasCookie("operatorId", { req }))
-    throw new Error("Missing required cookie(s). [operatorId]");
+  const sessionCookie = getCookie(OPERATOR_SESSION_COOKIE_NAME, { req })!;
+  const sessionData = AuthLib.getSessionData(sessionCookie);
   const result = await prisma.trip.findMany({
-    where: { operatorId },
+    where: { operatorId: sessionData.operatorId },
     orderBy: { id: "desc" },
   });
   return { props: { trips: JSON.parse(JSON.stringify(result)) } };
@@ -139,12 +139,12 @@ const TripItem: FC<TripItemProps> = ({ trip, reHydrateTripList }) => {
   const at = trip.arrivalTime;
 
   const edit = () => {
-    rt.push(`/partner/trips/entry?ops=edit&id=${trip.id}`);
+    rt.push(`/operator/trips/entry?ops=edit&id=${trip.id}`);
   };
   const remove = async (id: string) => {
-    const res = await PartnerServices.TripManager.xOperation(
+    const res = await OperatorServices.TripManager.xOperation(
       id,
-      XTripOperation.DELETE
+      XTripOps.DELETE
     );
     UtilLib.handleFetchResponse(res, {
       successCallBack: reHydrateTripList,
@@ -152,9 +152,9 @@ const TripItem: FC<TripItemProps> = ({ trip, reHydrateTripList }) => {
     });
   };
   const launch = async (id: string) => {
-    let res = await PartnerServices.TripManager.xOperation(
+    let res = await OperatorServices.TripManager.xOperation(
       id,
-      XTripOperation.LAUNCH
+      XTripOps.LAUNCH
     );
     UtilLib.handleFetchResponse(res, {
       successCallBack: reHydrateTripList,
@@ -163,9 +163,9 @@ const TripItem: FC<TripItemProps> = ({ trip, reHydrateTripList }) => {
   };
 
   const withdraw = async (id: string) => {
-    let res = await PartnerServices.TripManager.xOperation(
+    let res = await OperatorServices.TripManager.xOperation(
       id,
-      XTripOperation.WITHDRAW
+      XTripOps.WITHDRAW
     );
     UtilLib.handleFetchResponse(res, {
       successCallBack: reHydrateTripList,
@@ -175,7 +175,7 @@ const TripItem: FC<TripItemProps> = ({ trip, reHydrateTripList }) => {
 
   return (
     <li>
-      <Link href={`/partner/trips/${trip.id}`}>
+      <Link href={`/operator/trips/${trip.id}`}>
         <p>
           {DatetimeLib.extractTimeForDisplay(dt)} - {trip.title}
         </p>

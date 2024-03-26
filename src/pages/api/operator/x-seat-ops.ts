@@ -1,4 +1,4 @@
-import { HttpVerb, XSeatOperation } from "@/constants";
+import { HttpVerb, XSeatOps } from "@/constants";
 import { ClientErr } from "@/lib/errors";
 import { isString } from "@/lib/guards";
 import prisma from "@/lib/prisma-client";
@@ -19,13 +19,13 @@ export default async function handler(
         "Invalid or missing request query parameter(s): [id, ops]"
       );
     }
-    const validOps = Object.values(XSeatOperation);
-    if (!validOps.includes(ops as XSeatOperation)) {
+    const validOps = Object.values(XSeatOps);
+    if (!validOps.includes(ops as XSeatOps)) {
       throw new ClientErr(400, "Invalid operation provided.");
     }
-    if (req.method === HttpVerb.PATCH && ops === XSeatOperation.LOCK) {
+    if (req.method === HttpVerb.PATCH && ops === XSeatOps.LOCK) {
       await prisma.seat.update({ where: { id }, data: { isAvailable: false } });
-    } else if (req.method === HttpVerb.PATCH && ops === XSeatOperation.OPEN) {
+    } else if (req.method === HttpVerb.PATCH && ops === XSeatOps.OPEN) {
       await prisma.seat.update({ where: { id }, data: { isAvailable: true } });
     }
     res

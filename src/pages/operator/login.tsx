@@ -1,8 +1,6 @@
-import useInputController from "@/hooks/useInputController";
-import {
-  passwdValidationSchema,
-  unameValidationSchema,
-} from "@/lib/zod-schema";
+import useFieldController from "@/hooks/useFieldController";
+import { UtilLib } from "@/lib/util";
+import { passwdSchema, unameSchema } from "@/lib/zod-schema";
 import { Auth } from "@/services/auth";
 import { $Enums } from "@prisma/client";
 import { useRouter } from "next/router";
@@ -11,18 +9,18 @@ import React from "react";
 const isDev = process.env.NODE_ENV === "development";
 
 const Page = () => {
-  const unameInputCtrl = useInputController({
+  const unameInputCtrl = useFieldController({
     initialValue: isDev ? "johndoe" : "",
-    zodSchema: unameValidationSchema,
+    zodSchema: unameSchema,
   });
 
-  const passwdInputCtrl = useInputController({
+  const passwdInputCtrl = useFieldController({
     initialValue: isDev ? "sixtyNine69)^" : "",
-    zodSchema: passwdValidationSchema,
+    zodSchema: passwdSchema,
   });
 
   const [responseErr, setResponseErr] = React.useState("");
-  const clearError = () => setResponseErr("");
+  const clearResponseErr = () => setResponseErr("");
   const rt = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -30,20 +28,21 @@ const Page = () => {
     if (!unameInputCtrl.validity || !passwdInputCtrl.validity) return;
     const uname = unameInputCtrl.value;
     const passwd = passwdInputCtrl.value;
-    const res = await Auth.login({ uname, passwd }, $Enums.UserType.PARTNER);
-    const parsed = await res.json();
-    if (res.ok) {
-      rt.push("/partner/trips");
-    } else {
-      setResponseErr(parsed.message);
-    }
+    const res = await Auth.login({ uname, passwd }, $Enums.UserType.OPERATOR);
+    UtilLib.handleFetchResponse(res, {
+      successCallBack(data) {
+        clearResponseErr();
+        rt.push("/operator");
+      },
+      errCallback: setResponseErr,
+    });
   };
 
   return (
     <div>
       {responseErr && (
         <p>
-          {responseErr} <button onClick={clearError}>clear error</button>
+          {responseErr} <button onClick={clearResponseErr}>clear error</button>
         </p>
       )}
       <form onSubmit={handleLogin}>

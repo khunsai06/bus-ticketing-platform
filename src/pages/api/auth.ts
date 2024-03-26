@@ -16,7 +16,7 @@ export default async function handler(
   try {
     const allowedMethods = [HttpVerb.POST];
     UtilLib.validateRequestMethod(req, allowedMethods);
-    const { userType } = req.query;
+    const userType = req.query.userType;
     if (!isString(userType)) {
       throw new ClientErr(
         400,
@@ -36,21 +36,16 @@ export default async function handler(
     }
     const credentials = await prismaClient.credential.findFirstOrThrow({
       where: {
-        OR: [
-          { consumer: { registrationEmail: payload.email } },
-          { uname: payload.uname },
-        ],
+        OR: [{ uname: payload.uname }, { email: payload.email }],
         userType: userType as $Enums.UserType,
       },
-      include: { admin: true, consumer: true, partner: true },
+      include: { admin: true, consumer: true, operatorPersonnel: true },
     });
     await AuthLib.passwdCompare(req.body.passwd, credentials.passwd);
     const token = await AuthLib.tokenCreate({
       cid: credentials.id,
-      uname: credentials.uname,
       userType: credentials.userType,
-      email: credentials.consumer?.registrationEmail,
-      operatorId: credentials.partner?.operatorId,
+      operatorId: credentials.operatorPersonnel?.operatorId,
     });
     const cookie = serialize(`${userType.toLowerCase()}-session`, token, {
       httpOnly: true,
@@ -66,7 +61,6 @@ export default async function handler(
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      console.error(error);
       res.status(404).json({
         message:
           "User not found. Please verify your credentials and try again.",

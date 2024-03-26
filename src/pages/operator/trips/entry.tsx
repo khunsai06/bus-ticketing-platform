@@ -1,10 +1,10 @@
-import { PartnerServices } from "@/services/partner";
+import { OperatorServices } from "@/services/operator";
 import prisma from "@/lib/prisma-client";
 import { UtilLib } from "@/lib/util";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
-import { Trip2 } from "@/lib/types";
+import React from "react";
+import { Trip2, TripEntryPayload } from "@/lib/types";
 import { isString } from "@/lib/guards";
 import { getCookie, hasCookie } from "cookies-next";
 import { DatetimeLib } from "@/lib/datetime";
@@ -36,11 +36,11 @@ const NewTripFormPage = ({
     const operatorId = getCookie("operatorId")!;
     const fd = new FormData(e.target as HTMLFormElement);
     const title = fd.get("title");
-    const departureLocation = fd.get("departureLocation")!;
-    const arrivalLocation = fd.get("arrivalLocation")!;
+    const departureLocation = fd.get("departureLocation");
+    const arrivalLocation = fd.get("arrivalLocation");
     const intermediateStops = fd.get("stops");
     const departureTime = fd.get("departureTime");
-    const arrivalTime = fd.get("arrivalTime");
+    const arrivalTime = fd.get("arrivalTime")!;
     const distance = Number(fd.get("distance"));
     const price = Number(fd.get("price"));
     const additional = fd.get("additional");
@@ -55,14 +55,15 @@ const NewTripFormPage = ({
       price,
       additional,
     };
+
     let res: Response;
     if (isEditMode) {
-      res = await PartnerServices.TripManager.update(trip!.id, data);
+      res = await OperatorServices.TripManager.update(trip!.id, data);
     } else {
-      res = await PartnerServices.TripManager.create(operatorId, data);
+      res = await OperatorServices.TripManager.create(operatorId, data);
     }
     UtilLib.handleFetchResponse(res, {
-      successCallBack: () => rt.push("/partner/trips"),
+      successCallBack: () => rt.push("/operator/trips"),
       errCallback: console.error,
     });
   };

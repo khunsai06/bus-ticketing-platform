@@ -25,3 +25,11 @@ export interface TripEntryPayload {
   price: number;
   additional: string;
 }
+
+export interface ConsumerSignUpPayload {
+  name: string;
+  dob: string;
+  gender: string;
+  email: string;
+  passwd: string;
+}

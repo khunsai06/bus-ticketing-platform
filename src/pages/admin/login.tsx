@@ -4,10 +4,7 @@ import { mdiLoginVariant, mdiAccountOutline, mdiKeyOutline } from "@mdi/js";
 import Icon from "@mdi/react";
 import { iconSize } from "@/constants";
 import useTextFieldController from "@/hooks/useTextFieldController";
-import {
-  passwdValidationSchema,
-  unameValidationSchema,
-} from "@/lib/zod-schema";
+import { passwdSchema, unameSchema } from "@/lib/zod-schema";
 import { concatenateStrings } from "@/lib/util";
 import { useRouter } from "next/router";
 
@@ -19,7 +16,7 @@ const Page: FC<any> = () => {
     mutate: mutateUname,
   } = useTextFieldController({
     initialValue: "",
-    schema: unameValidationSchema,
+    schema: unameSchema,
   });
 
   const {
@@ -28,7 +25,7 @@ const Page: FC<any> = () => {
     mutate: mutatePasswd,
   } = useTextFieldController({
     initialValue: "",
-    schema: passwdValidationSchema,
+    schema: passwdSchema,
   });
 
   useEffect(() => {

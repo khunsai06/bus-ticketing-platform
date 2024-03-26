@@ -5,9 +5,7 @@ import { $Enums } from "@prisma/client";
 
 type JWTPayload2 = {
   cid: string;
-  uname: string;
   userType: $Enums.UserType;
-  email?: string;
   operatorId?: string;
 } & JWTPayload;
 

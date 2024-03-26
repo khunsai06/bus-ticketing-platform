@@ -17,16 +17,17 @@ export namespace UtilLib {
   }
   export function handleErrorAndRespond(error: unknown, res: NextApiResponse) {
     if (error instanceof ClientErr) {
-      console.error(error);
-      res.status(error.statusCode).json({ message: error.message });
+      return res.status(error.statusCode).json({ message: error.message });
     } else if (error instanceof ServerErr) {
-      console.error(error);
-      res.status(error.statusCode).json({
+      return res.status(error.statusCode).json({
         message: httpErrorCodes[error.statusCode],
       });
     } else if (error instanceof Error) {
       console.error(error);
-      res.status(500).json({ message: httpErrorCodes[500] });
+      return res.status(500).json({ message: httpErrorCodes[500] });
+    } else {
+      console.error(error);
+      return res.status(500).json({ message: httpErrorCodes[500] });
     }
   }
   type SuccessCallBack<T> = (data: T) => void;

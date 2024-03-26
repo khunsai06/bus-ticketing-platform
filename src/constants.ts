@@ -1,11 +1,13 @@
+import { $Enums } from "@prisma/client";
+
 export const iconSize = 0.8;
 
-export enum XSeatOperation {
+export enum XSeatOps {
   LOCK = "LOCK",
   OPEN = "OPEN",
 }
 
-export enum XTripOperation {
+export enum XTripOps {
   LAUNCH = "LAUNCH",
   WITHDRAW = "WITHDRAW",
   DELETE = "DELETE",
@@ -18,6 +20,10 @@ export enum HttpVerb {
   PATCH = "PATCH",
   DELETE = "DELETE",
 }
+
+export const CONSUMER_SESSION_COOKIE_NAME = `${$Enums.UserType.CONSUMER.toLowerCase()}-session`;
+export const OPERATOR_SESSION_COOKIE_NAME = `${$Enums.UserType.OPERATOR.toLowerCase()}-session`;
+export const ADMIN_SESSION_COOKIE_NAME = `${$Enums.UserType.ADMIN.toLowerCase()}-session`;
 
 type HttpErrorCodes = {
   [key: number]: string;

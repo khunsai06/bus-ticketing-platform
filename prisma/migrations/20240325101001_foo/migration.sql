@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "UserType" AS ENUM ('CONSUMER', 'ADMIN', 'PARTNER');
+CREATE TYPE "UserType" AS ENUM ('CONSUMER', 'ADMIN', 'OPERATOR');
 
 -- CreateEnum
 CREATE TYPE "TripStatus" AS ENUM ('IDLE', 'LAUNCHED', 'WITHDRAWN');
@@ -7,7 +7,8 @@ CREATE TYPE "TripStatus" AS ENUM ('IDLE', 'LAUNCHED', 'WITHDRAWN');
 -- CreateTable
 CREATE TABLE "credentials" (
     "id" TEXT NOT NULL,
-    "uname" TEXT NOT NULL,
+    "uname" TEXT,
+    "email" TEXT,
     "passwd" TEXT NOT NULL,
     "userType" "UserType" NOT NULL,
 
@@ -15,29 +16,31 @@ CREATE TABLE "credentials" (
 );
 
 -- CreateTable
-CREATE TABLE "Consumer" (
+CREATE TABLE "consumers" (
     "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "dob" DATE NOT NULL,
+    "gender" TEXT NOT NULL,
     "cid" TEXT NOT NULL,
-    "registrationEmail" TEXT NOT NULL,
 
-    CONSTRAINT "Consumer_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "consumers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Admin" (
+CREATE TABLE "admins" (
     "id" TEXT NOT NULL,
     "cid" TEXT NOT NULL,
 
-    CONSTRAINT "Admin_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "partners" (
+CREATE TABLE "operator_personnel" (
     "id" TEXT NOT NULL,
     "cid" TEXT NOT NULL,
     "operatorId" TEXT NOT NULL,
 
-    CONSTRAINT "partners_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "operator_personnel_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -62,7 +65,7 @@ CREATE TABLE "trips" (
     "distance" DOUBLE PRECISION,
     "departureTime" TIMESTAMP(3) NOT NULL,
     "arrivalTime" TIMESTAMP(3) NOT NULL,
-    "price" DECIMAL(65,30) NOT NULL,
+    "price" MONEY NOT NULL,
     "additional" TEXT,
     "status" "TripStatus" NOT NULL DEFAULT 'IDLE',
     "operatorId" TEXT NOT NULL,
@@ -85,16 +88,16 @@ CREATE TABLE "seats" (
 CREATE UNIQUE INDEX "credentials_uname_key" ON "credentials"("uname");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Consumer_cid_key" ON "Consumer"("cid");
+CREATE UNIQUE INDEX "credentials_email_key" ON "credentials"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Consumer_registrationEmail_key" ON "Consumer"("registrationEmail");
+CREATE UNIQUE INDEX "consumers_cid_key" ON "consumers"("cid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Admin_cid_key" ON "Admin"("cid");
+CREATE UNIQUE INDEX "admins_cid_key" ON "admins"("cid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "partners_cid_key" ON "partners"("cid");
+CREATE UNIQUE INDEX "operator_personnel_cid_key" ON "operator_personnel"("cid");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "operators_name_key" ON "operators"("name");
@@ -103,16 +106,16 @@ CREATE UNIQUE INDEX "operators_name_key" ON "operators"("name");
 CREATE UNIQUE INDEX "operators_registrationEmail_key" ON "operators"("registrationEmail");
 
 -- AddForeignKey
-ALTER TABLE "Consumer" ADD CONSTRAINT "Consumer_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "consumers" ADD CONSTRAINT "consumers_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Admin" ADD CONSTRAINT "Admin_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "admins" ADD CONSTRAINT "admins_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "partners" ADD CONSTRAINT "partners_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "operator_personnel" ADD CONSTRAINT "operator_personnel_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "partners" ADD CONSTRAINT "partners_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "operator_personnel" ADD CONSTRAINT "operator_personnel_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trips" ADD CONSTRAINT "trips_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
