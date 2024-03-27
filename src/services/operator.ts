@@ -37,6 +37,7 @@ export namespace OperatorServices {
   }
 
   export class SeatManager {
+    static async generate(tripId: string, count: number) {}
     static async xOperation(id: string, ops: XSeatOps) {
       return await fetch(`/api/operator/x-seat-ops?id=${id}&ops=${ops}`, {
         method: HttpVerb.PATCH,

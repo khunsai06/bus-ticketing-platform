@@ -1,16 +1,18 @@
 import { HttpVerb } from "@/constants";
 import { ClientErr } from "@/lib/errors";
-import { isString } from "@/lib/guards";
 import prisma from "@/lib/prisma-client";
 import { TripEntryPayload } from "@/lib/types";
 import { UtilLib } from "@/lib/util";
 import { NextApiRequest, NextApiResponse } from "next";
+import { isString } from "node:util";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   try {
+    console.log(req.body);
+
     if (req.query.id) {
       UtilLib.validateRequestMethod(req, [HttpVerb.PUT]);
       processTripUpdateRequest(req);
@@ -38,6 +40,7 @@ function isExpectedPayload(body: any): body is TripEntryPayload {
     typeof body.arrivalTime === "string" &&
     typeof body.distance === "number" &&
     typeof body.price === "number" &&
+    typeof body.amenities === "string" &&
     typeof body.additional === "string"
   );
 }
@@ -54,10 +57,13 @@ async function processTripCreateRequest(req: NextApiRequest) {
       "Invalid or missing request query parameter(s): [operatorId]."
     );
   }
-  const { departureTime, arrivalTime, ...args } = payload;
+  const { departureTime, arrivalTime, intermediateStops, amenities, ...args } =
+    payload;
   const data = {
     departureTime: new Date(departureTime),
     arrivalTime: new Date(arrivalTime),
+    intermediateStops: UtilLib.commaSeparatedStringToArray(intermediateStops),
+    amenities: UtilLib.commaSeparatedStringToArray(amenities),
     ...args,
     operatorId,
   };
@@ -76,20 +82,23 @@ async function processTripUpdateRequest(req: NextApiRequest) {
       "Invalid or missing request query parameter(s): [id]."
     );
   }
-  const { departureTime, arrivalTime, ...args } = payload;
+  const { departureTime, arrivalTime, intermediateStops, amenities, ...args } =
+    payload;
   const data = {
     departureTime: new Date(departureTime),
     arrivalTime: new Date(arrivalTime),
+    intermediateStops: UtilLib.commaSeparatedStringToArray(intermediateStops),
+    amenities: UtilLib.commaSeparatedStringToArray(amenities),
     ...args,
   };
   return prisma.trip.update({ where: { id }, data });
 }
 
-async function generateSeats(tripId: string, seatCapacity: number) {
-  const seatList = Array.from({ length: seatCapacity }, (_, index) => {
-    return { identifier: String(index + 1), tripId };
-  });
-  await prisma.seat.createMany({
-    data: seatList,
-  });
-}
+// async function generateSeats(tripId: string, seatCapacity: number) {
+//   const seatList = Array.from({ length: seatCapacity }, (_, index) => {
+//     return { identifier: String(index + 1), tripId };
+//   });
+//   await prisma.seat.createMany({
+//     data: seatList,
+//   });
+// }

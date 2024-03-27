@@ -17,7 +17,12 @@ const NewTripFormPage = ({
   const titleVal = isEditMode ? trip!.title : "";
   const depLocVal = isEditMode ? trip!.departureLocation : "";
   const arrLocVal = isEditMode ? trip!.arrivalLocation : "";
-  const interStopsVal = isEditMode ? trip!.intermediateStops ?? "" : "";
+  const stopsVal = isEditMode
+    ? UtilLib.arrayToCommaSeparatedString(trip!.intermediateStops)
+    : "";
+  const amensVal = isEditMode
+    ? UtilLib.arrayToCommaSeparatedString(trip!.amenities)
+    : "";
   const depTimeVal = isEditMode
     ? DatetimeLib.convertIsoToDatetimeLocal(trip!.departureTime)
     : "";
@@ -43,6 +48,7 @@ const NewTripFormPage = ({
     const arrivalTime = fd.get("arrivalTime")!;
     const distance = Number(fd.get("distance"));
     const price = Number(fd.get("price"));
+    const amenities = fd.get("amenities");
     const additional = fd.get("additional");
     const data = {
       title,
@@ -53,6 +59,7 @@ const NewTripFormPage = ({
       arrivalTime,
       distance,
       price,
+      amenities,
       additional,
     };
 
@@ -73,65 +80,103 @@ const NewTripFormPage = ({
   return (
     <div className="hero is-fullheight p-5" onSubmit={handleSubmit}>
       <form>
-        <input type="text" name="title" defaultValue={titleVal} />
-        <br />
-        <select name="departureLocation" defaultValue={depLocVal}>
-          <option value="Yangon">Yangon</option>
-          <option value="Mandalay">Mandalay</option>
-          <option value="Lashio">Lashio</option>
-        </select>
-        <br />
-        <select name="arrivalLocation" defaultValue={arrLocVal}>
-          <option value="Yangon">Yangon</option>
-          <option value="Mandalay">Mandalay</option>
-          <option value="Lashio">Lashio</option>
-        </select>
-        <br />
-        <input
-          type="text"
-          name="stops"
-          placeholder="intermediate stops"
-          defaultValue={interStopsVal}
-        />
-        <br />
-        <input
-          type="number"
-          name="distance"
-          min={0}
-          step={0.01}
-          defaultValue={distanceVal}
-        />
-        <br />
-        <input
-          type="datetime-local"
-          name="departureTime"
-          defaultValue={depTimeVal}
-          required
-        />
-        <br />
-        <input
-          type="datetime-local"
-          name="arrivalTime"
-          defaultValue={arrTimeVal}
-          required
-        />
-        <br />
-        <input
-          type="number"
-          name="price"
-          min={0}
-          step={0.01}
-          defaultValue={priceVal}
-        />
-        <br />
-        <textarea
-          name="additional"
-          cols={30}
-          rows={4}
-          placeholder="Additional information"
-          defaultValue={additionalVal}
-        />
-        <br />
+        <div>
+          <label>Display Name</label>
+          <br />
+          <input type="text" name="title" defaultValue={titleVal} />
+        </div>
+        <div>
+          <label>Departure Location</label>
+          <br />
+          <select name="departureLocation" defaultValue={depLocVal}>
+            <option value="Yangon">Yangon</option>
+            <option value="Mandalay">Mandalay</option>
+            <option value="Lashio">Lashio</option>
+          </select>
+        </div>
+        <div>
+          <label>Arrival Location</label>
+          <br />
+          <select name="arrivalLocation" defaultValue={arrLocVal}>
+            <option value="Yangon">Yangon</option>
+            <option value="Mandalay">Mandalay</option>
+            <option value="Lashio">Lashio</option>
+          </select>
+        </div>
+        <div>
+          <label>Intermediate Stops</label>
+          <br />
+          <textarea
+            cols={30}
+            rows={2}
+            name="stops"
+            defaultValue={stopsVal}
+            placeholder="Enter intermediate stops separated by commas (e.g., foo, bar, baz)"
+          />
+        </div>
+        <div>
+          <label>Distance (km)</label> <br />
+          <input
+            type="number"
+            name="distance"
+            min={0}
+            step={0.01}
+            defaultValue={distanceVal}
+          />
+        </div>
+        <div>
+          <label>Depart At</label>
+          <br />
+          <input
+            type="datetime-local"
+            name="departureTime"
+            defaultValue={depTimeVal}
+            required
+          />
+        </div>
+        <div>
+          <label>Arrive At</label>
+          <br />
+          <input
+            type="datetime-local"
+            name="arrivalTime"
+            defaultValue={arrTimeVal}
+            required
+          />
+        </div>
+        <div>
+          <label>Price</label>
+          <br />
+          <input
+            type="number"
+            name="price"
+            min={0}
+            step={0.01}
+            defaultValue={priceVal}
+          />
+        </div>
+        <div>
+          <label>Amenities</label>
+          <br />
+          <textarea
+            cols={30}
+            rows={2}
+            name="amenities"
+            defaultValue={amensVal}
+            placeholder="Enter amenities separated by commas (e.g., foo, bar, baz)"
+          />
+        </div>
+        <div>
+          <label>Additional</label>
+          <br />
+          <textarea
+            name="additional"
+            cols={30}
+            rows={4}
+            placeholder="Additional information"
+            defaultValue={additionalVal}
+          />
+        </div>
         <button type="submit">Make a trip</button>
       </form>
       <hr />

@@ -54,6 +54,8 @@ const details: React.FC<Props> = ({ trip }) => {
     });
   };
 
+  const generate = async () => {};
+
   const idleActions = (
     <div>
       <button onClick={remove}>Delete</button>{" "}
@@ -82,12 +84,17 @@ const details: React.FC<Props> = ({ trip }) => {
         <div>
           Route: {_trip.departureLocation} - {_trip.arrivalLocation}
         </div>
-        <div>Stops: {_trip.intermediateStops || "N/A"}</div>
+        <div>
+          Stops: {UtilLib.arrayToCommaSeparatedString(_trip.intermediateStops)}
+        </div>
         <div>Distance: {_trip.distance} km</div>
         <div>Depart At: {departAt}</div>
         <div>Arrives At: {arriveAt}</div>
         <div>Price: {_trip.price} MMK</div>
         <div>Status: {_trip.status}</div>
+        <div>
+          Amenities: {UtilLib.arrayToCommaSeparatedString(_trip.amenities)}
+        </div>
         <div>Extra: {_trip.additional || "N/A"}</div>
         <br />
         {status === "IDLE" && idleActions}
@@ -96,6 +103,9 @@ const details: React.FC<Props> = ({ trip }) => {
       </div>
       <div>
         <h4>Seats</h4>
+        <div>
+          <button onClick={generate}>generate</button>
+        </div>
       </div>
     </section>
   );

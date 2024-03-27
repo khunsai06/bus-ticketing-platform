@@ -27,6 +27,7 @@ export interface TripEntryPayload {
   arrivalTime: string;
   distance: number;
   price: number;
+  amenities: string;
   additional: string;
 }
 

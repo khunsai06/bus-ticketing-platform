@@ -71,3 +71,30 @@ export const httpErrorCodes: HttpErrorCodes = {
   510: "Not Extended",
   511: "Network Authentication Required",
 };
+
+export const SEAT_LOCATIONS = {
+  WINDOW: "Window",
+  AISLE: "Aisle",
+  MIDDLE: "Middle",
+  FRONT: "Front",
+  REAR: "Rear",
+  EMERGENCY_EXIT: "Emergency Exit",
+  BULKHEAD: "Bulkhead",
+  WHEELCHAIR_ACCESSIBLE: "Wheelchair Accessible",
+};
+
+export const SEAT_FEATURES = {
+  EXTRA_LEGROOM: "Extra Legroom",
+  POWER_OUTLET: "Power Outlet",
+  WI_FI: "Wi-Fi",
+  ENTERTAINMENT_SYSTEM: "Entertainment System",
+  RECLINING: "Reclining",
+  TABLE: "Table",
+  BLANKET: "Blanket",
+  PILLOW: "Pillow",
+  USB_CHARGING: "USB Charging",
+  PERSONAL_SCREEN: "Personal Screen",
+  OVERHEAD_STORAGE: "Overhead Storage",
+  FOOD_SERVICE: "Food Service",
+  BEVERAGE_SERVICE: "Beverage Service",
+};

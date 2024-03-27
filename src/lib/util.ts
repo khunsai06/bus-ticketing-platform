@@ -6,6 +6,15 @@ export namespace UtilLib {
   export function concatenateStrings(list: string[]): string {
     return list.join(" ");
   }
+  export function commaSeparatedStringToArray(inputString: string): string[] {
+    const arrayOfStrings = inputString.split(",").map((str) => str.trim());
+    return arrayOfStrings;
+  }
+  export function arrayToCommaSeparatedString(inputArray: string[]): string {
+    const commaSeparatedString = inputArray.join(", ");
+    return commaSeparatedString;
+  }
+
   export function validateRequestMethod(
     req: NextApiRequest,
     allowedMethods: string[]
