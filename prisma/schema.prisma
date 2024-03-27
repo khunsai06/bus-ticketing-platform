@@ -62,7 +62,7 @@ model Operator {
   id                String              @id @default(cuid())
   name              String              @unique
   registrationEmail String              @unique
-  logo              Bytes?              @db.ByteA
+  logo              String?
   background        String?
   supportContacts   String[]
   associates        OperatorPersonnel[]

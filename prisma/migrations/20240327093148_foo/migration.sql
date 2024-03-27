@@ -48,7 +48,7 @@ CREATE TABLE "operators" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "registrationEmail" TEXT NOT NULL,
-    "logo" BYTEA,
+    "logo" TEXT,
     "background" TEXT,
     "supportContacts" TEXT[],
 

@@ -12,6 +12,8 @@ import {
 } from "./constants";
 
 const excludedEndPoints = [
+  "/test",
+  "/api/upload",
   "/operator/login",
   "/consumer/login",
   "/consumer/signup",
@@ -49,10 +51,10 @@ export async function middleware(req: NextRequest) {
   const operatorLoginUrl = new URL("/operator/login", req.url);
   const consumerLoginUrl = new URL("/consumer/login", req.url);
   const adminLoginUrl = new URL("/admin/login", req.url);
-  console.log({ cookies: req.cookies.toString() });
-  console.log({ path: req.nextUrl.pathname });
-  console.log({ isOperatorEndPoints });
-  console.log({ hasOperatorSession });
+  // console.log({ cookies: req.cookies.toString() });
+  // console.log({ path: req.nextUrl.pathname });
+  // console.log({ isOperatorEndPoints });
+  // console.log({ hasOperatorSession });
 
   if (isOperatorEndPoints && !hasOperatorSession)
     return NextResponse.redirect(operatorLoginUrl);

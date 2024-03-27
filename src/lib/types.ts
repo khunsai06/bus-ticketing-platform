@@ -1,9 +1,13 @@
-import { type Seat, Trip } from "@prisma/client";
+import { type Seat, Trip, Operator } from "@prisma/client";
 
 export type Trip2 = Omit<Trip, "departureTime" | "arrivalTime" | "price"> & {
   departureTime: string;
   arrivalTime: string;
   price: number;
+};
+
+export type Trip3 = Trip2 & {
+  operator: Operator;
 };
 
 export type Seat2 = Seat;

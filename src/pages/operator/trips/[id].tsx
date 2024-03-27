@@ -1,82 +1,115 @@
-import { XSeatOps } from "@/constants";
+// import { isString } from "@/lib/guards";
+import { XTripOps } from "@/constants";
+import { DatetimeLib } from "@/lib/datetime";
 import prisma from "@/lib/prisma-client";
-import { Seat2 } from "@/lib/types";
+import { Trip2 } from "@/lib/types";
 import { UtilLib } from "@/lib/util";
 import { OperatorServices } from "@/services/operator";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import React, { type FC, useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { isString } from "node:util";
+import React, { useState } from "react";
 
-const TripDetails = ({
-  seats,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [seatList, setSeatList] = useState<Seat2[]>([]);
+type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
+const details: React.FC<Props> = ({ trip }) => {
+  const [_trip, setTrip] = useState(trip);
+  const rt = useRouter();
+  const departAt = DatetimeLib.formatDateForDisplay(_trip.departureTime);
+  const arriveAt = DatetimeLib.formatDateForDisplay(_trip.arrivalTime);
+  const status = _trip.status;
 
-  useEffect(() => {
-    setSeatList(seats);
-  }, []);
+  const edit = () => rt.push(`/operator/trips/entry?ops=edit&id=${_trip.id}`);
 
-  const reHydrateSeatList = async () => {
-    const res = await OperatorServices.SeatManager.getMany(seats[0].tripId);
-    UtilLib.handleFetchResponse<Seat2[]>(res, {
-      successCallBack: setSeatList,
-      errCallback: console.error,
-    });
-  };
-
-  return (
-    <div>
-      <ul>
-        {seatList.map((seat, index) => {
-          return (
-            <SeatItem
-              key={index}
-              seat={seat}
-              reHydrateSeatList={reHydrateSeatList}
-            />
-          );
-        })}
-      </ul>
-    </div>
-  );
-};
-
-export default TripDetails;
-
-export const getServerSideProps = (async (ctx) => {
-  const { id } = ctx.query;
-  const seats = await prisma.seat.findMany({
-    where: { tripId: id as string },
-    orderBy: { id: "asc" },
-  });
-  return {
-    props: { seats },
-  };
-}) satisfies GetServerSideProps<{ seats: Seat2[] }>;
-
-const SeatItem: FC<{ seat: Seat2; reHydrateSeatList: VoidFunction }> = ({
-  seat,
-  reHydrateSeatList,
-}) => {
-  const seatAvailabilityToggler = async () => {
-    const operation = seat.isAvailable ? XSeatOps.LOCK : XSeatOps.OPEN;
-    const res = await OperatorServices.SeatManager.xOperation(
-      seat.id,
-      operation
+  const remove = async () => {
+    const res = await OperatorServices.TripManager.xOperation(
+      _trip.id,
+      XTripOps.DELETE
     );
     UtilLib.handleFetchResponse(res, {
-      successCallBack: reHydrateSeatList,
+      successCallBack(_) {
+        rt.replace("/operator/trips");
+      },
       errCallback: console.error,
     });
   };
+  const launch = async () => {
+    const res = await OperatorServices.TripManager.xOperation(
+      _trip.id,
+      XTripOps.LAUNCH
+    );
+    UtilLib.handleFetchResponse(res, {
+      successCallBack(_) {
+        setTrip((prev) => ({ ...prev, status: "LAUNCHED" }));
+      },
+      errCallback: console.error,
+    });
+  };
+  const withdraw = async (id: string) => {
+    const res = await OperatorServices.TripManager.xOperation(
+      id,
+      XTripOps.WITHDRAW
+    );
+    UtilLib.handleFetchResponse(res, {
+      errCallback: console.error,
+    });
+  };
+
+  const idleActions = (
+    <div>
+      <button onClick={remove}>Delete</button>{" "}
+      <button onClick={edit}>Edit</button>{" "}
+      <button onClick={launch}>Launch</button>
+    </div>
+  );
+
+  const launchedActions = (
+    <div>
+      <button>Withdraw</button>
+    </div>
+  );
+
+  const withdrawnActions = (
+    <div>
+      <button onClick={remove}>Delete</button>
+    </div>
+  );
+
   return (
-    <li>
-      <p>
-        Identifier: {seat.identifier} Status:{" "}
-        {seat.isAvailable ? "FREE" : "RESERVED"}{" "}
-        <button onClick={seatAvailabilityToggler}>
-          {seat.isAvailable ? "Lock" : "Open"}
-        </button>{" "}
-      </p>
-    </li>
+    <section>
+      <div>
+        <h4>Details</h4>
+        <div>Name: {_trip.title}</div>
+        <div>
+          Route: {_trip.departureLocation} - {_trip.arrivalLocation}
+        </div>
+        <div>Stops: {_trip.intermediateStops || "N/A"}</div>
+        <div>Distance: {_trip.distance} km</div>
+        <div>Depart At: {departAt}</div>
+        <div>Arrives At: {arriveAt}</div>
+        <div>Price: {_trip.price} MMK</div>
+        <div>Status: {_trip.status}</div>
+        <div>Extra: {_trip.additional || "N/A"}</div>
+        <br />
+        {status === "IDLE" && idleActions}
+        {status === "LAUNCHED" && launchedActions}
+        {status === "WITHDRAWN" && withdrawnActions}
+      </div>
+      <div>
+        <h4>Seats</h4>
+      </div>
+    </section>
   );
 };
+
+export default details;
+
+export const getServerSideProps = (async ({ req, query }) => {
+  const id = query.id;
+  if (!isString(id))
+    throw new Error("Invalid or missing request query parameter(s): [id].");
+  const result = await prisma.trip.findFirst({ where: { id } });
+  const trip = JSON.parse(JSON.stringify(result)) as Trip2;
+  return {
+    props: { trip },
+  };
+}) satisfies GetServerSideProps<{ trip: Trip2 }>;

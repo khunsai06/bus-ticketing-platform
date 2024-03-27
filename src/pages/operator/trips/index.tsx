@@ -12,8 +12,9 @@ import moment from "moment";
 import { DatetimeLib } from "@/lib/datetime";
 import { getCookie, hasCookie } from "cookies-next";
 import { AuthLib } from "@/lib/auth";
+import TripItem2 from "@/components/operator/TripItem2";
 
-type TripFilterParams = {
+type TripsFilterParams = {
   status?: string;
   date?: moment.Moment;
   dl?: string;
@@ -24,7 +25,7 @@ const TripsPage = ({
   trips,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [tripList, setTripList] = useState<Trip2[]>(trips);
-  const [filterParams, setFilterParams] = useState<TripFilterParams>({});
+  const [filterParams, setFilterParams] = useState<TripsFilterParams>({});
 
   useEffect(() => {
     if (
@@ -43,9 +44,8 @@ const TripsPage = ({
   ]);
 
   const reHydrateTripList = async () => {
-    if (!hasCookie("operatorId")) {
+    if (!hasCookie("operatorId"))
       throw new Error("Missing 'operatorId' cookie for data retrieval.");
-    }
     const res = await OperatorServices.TripManager.getMany(
       getCookie("operatorId")!
     );
@@ -101,17 +101,22 @@ const TripsPage = ({
         <input type="date" name="date" onChange={handleFilterChange} />
       </section>
       <hr />
-      <ol>
-        {tripList.map((trip, index) => {
-          return (
-            <TripItem
-              key={index}
-              trip={trip}
-              reHydrateTripList={reHydrateTripList}
-            />
-          );
-        })}
-      </ol>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Departure Location</th>
+            <th>Arrival Location</th>
+            <th>Departs At</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tripList.map((trip, index) => (
+            <TripItem2 key={index} trip={trip} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
@@ -119,96 +124,15 @@ const TripsPage = ({
 export default TripsPage;
 
 export const getServerSideProps = (async ({ req }) => {
-  const sessionCookie = getCookie(OPERATOR_SESSION_COOKIE_NAME, { req })!;
-  const sessionData = AuthLib.getSessionData(sessionCookie);
-  const result = await prisma.trip.findMany({
-    where: { operatorId: sessionData.operatorId },
-    orderBy: { id: "desc" },
-  });
-  return { props: { trips: JSON.parse(JSON.stringify(result)) } };
+  try {
+    const sessionCookie = getCookie(OPERATOR_SESSION_COOKIE_NAME, { req })!;
+    const sessionData = AuthLib.getSessionData(sessionCookie);
+    const result = await prisma.trip.findMany({
+      where: { operatorId: sessionData.operatorId },
+      orderBy: { id: "desc" },
+    });
+    return { props: { trips: JSON.parse(JSON.stringify(result)) } };
+  } catch (error) {
+    return { notFound: true };
+  }
 }) satisfies GetServerSideProps<{ trips: Trip2[] }>;
-
-type TripItemProps = {
-  trip: Trip2;
-  reHydrateTripList: VoidFunction;
-};
-
-const TripItem: FC<TripItemProps> = ({ trip, reHydrateTripList }) => {
-  const rt = useRouter();
-  const dt = trip.departureTime;
-  const at = trip.arrivalTime;
-
-  const edit = () => {
-    rt.push(`/operator/trips/entry?ops=edit&id=${trip.id}`);
-  };
-  const remove = async (id: string) => {
-    const res = await OperatorServices.TripManager.xOperation(
-      id,
-      XTripOps.DELETE
-    );
-    UtilLib.handleFetchResponse(res, {
-      successCallBack: reHydrateTripList,
-      errCallback: console.error,
-    });
-  };
-  const launch = async (id: string) => {
-    let res = await OperatorServices.TripManager.xOperation(
-      id,
-      XTripOps.LAUNCH
-    );
-    UtilLib.handleFetchResponse(res, {
-      successCallBack: reHydrateTripList,
-      errCallback: console.error,
-    });
-  };
-
-  const withdraw = async (id: string) => {
-    let res = await OperatorServices.TripManager.xOperation(
-      id,
-      XTripOps.WITHDRAW
-    );
-    UtilLib.handleFetchResponse(res, {
-      successCallBack: reHydrateTripList,
-      errCallback: console.error,
-    });
-  };
-
-  return (
-    <li>
-      <Link href={`/operator/trips/${trip.id}`}>
-        <p>
-          {DatetimeLib.extractTimeForDisplay(dt)} - {trip.title}
-        </p>
-      </Link>
-      <p>
-        {trip.departureLocation} - {trip.arrivalLocation}
-      </p>
-      <p>Departs: {DatetimeLib.formatDateForDisplay(dt)}</p>
-      <p>
-        Arrives: {DatetimeLib.formatDateForDisplay(at)} Duration:{" "}
-        {DatetimeLib.getHourDifference(dt, at)} Hours
-      </p>
-      <p>1 seat x {trip.price} MMK</p>
-      <p>{trip.additional}</p>
-      <p>Status: {trip.status}</p>
-      {trip.status === "IDLE" && (
-        <div>
-          <button onClick={edit}>Edit</button>{" "}
-          <button onClick={() => remove(trip.id)}>Delete</button>{" "}
-          <button onClick={() => launch(trip.id)}>Launch</button>{" "}
-        </div>
-      )}
-      {trip.status === "LAUNCHED" && (
-        <div>
-          <button onClick={() => withdraw(trip.id)}>Withdraw</button>
-        </div>
-      )}
-      {trip.status === "WITHDRAWN" && (
-        <div>
-          <button onClick={() => remove(trip.id)}>Delete</button>{" "}
-        </div>
-      )}
-      <hr />
-    </li>
-  );
-};

@@ -1,7 +1,11 @@
 import React from "react";
 
 const ConsumerRootPage = () => {
-  return <div>ConsumerRootPage</div>;
+  return (
+    <>
+      <h1>Consumer Root</h1>
+    </>
+  );
 };
 
 export default ConsumerRootPage;

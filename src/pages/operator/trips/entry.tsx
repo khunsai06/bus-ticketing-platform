@@ -56,16 +56,19 @@ const NewTripFormPage = ({
       additional,
     };
 
-    let res: Response;
     if (isEditMode) {
-      res = await OperatorServices.TripManager.update(trip!.id, data);
+      const res = await OperatorServices.TripManager.update(trip!.id, data);
+      UtilLib.handleFetchResponse(res, {
+        successCallBack: () => rt.push(`/operator/trips/${trip!.id}`),
+        errCallback: console.error,
+      });
     } else {
-      res = await OperatorServices.TripManager.create(operatorId, data);
+      const res = await OperatorServices.TripManager.create(operatorId, data);
+      UtilLib.handleFetchResponse(res, {
+        successCallBack: () => rt.push("/operator/trips"),
+        errCallback: console.error,
+      });
     }
-    UtilLib.handleFetchResponse(res, {
-      successCallBack: () => rt.push("/operator/trips"),
-      errCallback: console.error,
-    });
   };
   return (
     <div className="hero is-fullheight p-5" onSubmit={handleSubmit}>
