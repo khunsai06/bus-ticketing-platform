@@ -19,7 +19,7 @@ export type CredentialPayload = {
 };
 
 export interface TripEntryPayload {
-  title: string;
+  name: string;
   departureLocation: string;
   arrivalLocation: string;
   intermediateStops: string;

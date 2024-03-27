@@ -76,7 +76,7 @@ model Operator {
 
 model Trip {
   id                String     @id @default(cuid())
-  title             String
+  name              String
   departureLocation String
   arrivalLocation   String
   intermediateStops String[]
@@ -109,47 +109,18 @@ enum SeatStatus {
 
 model Seat {
   id            String         @id @default(cuid())
-  status        SeatStatus     @default(FREE)
+  number        String
+  location      String[]
+  features      String[]
+  additional    String?
   trip          Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
   tripId        String
   reservationId String
+  status        SeatStatus     @default(FREE)
   reservation   Reservation?
   cancels       Cancellation[]
-  specRef       SeatSpecLink[]
 
   @@map("seats")
-}
-
-model SeatSpecLink {
-  seat    Seat      @relation(fields: [seatId], references: [id])
-  seatId  String
-  specs   SeatSpecs @relation(fields: [specsId], references: [id])
-  specsId String
-
-  @@id([seatId, specsId])
-  @@map("SeatSpecAssociation")
-}
-
-model SeatSpecs {
-  id         String   @id @default(cuid())
-  number     String
-  location   String[]
-  features   String[]
-  additional String?
-
-  seatRef     SeatSpecLink[]
-  busPreset   BusPreset      @relation(fields: [busPresetId], references: [id])
-  busPresetId String
-
-  @@map("seat_specs")
-}
-
-model BusPreset {
-  id        String      @id
-  name      String
-  seatSpecs SeatSpecs[]
-
-  @@map("bus_seating_presets")
 }
 
 model Reservation {

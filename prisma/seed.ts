@@ -5,7 +5,10 @@ const prisma = new PrismaClient();
 async function main() {
   const passwd = await bcrypt.hash("sixtyNine69)^", 10);
   const operator = await prisma.operator.create({
-    data: { name: "foo", registrationEmail: "foo@outlook.com" },
+    data: {
+      name: "Foo Bar Baz Express",
+      registrationEmail: "foo@outlook.com",
+    },
   });
   const credential = await prisma.credential.create({
     data: { uname: "johndoe", passwd, userType: $Enums.UserType.OPERATOR },

@@ -14,7 +14,7 @@ const NewTripFormPage = ({
   trip,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const rt = useRouter();
-  const titleVal = isEditMode ? trip!.title : "";
+  const nameVal = isEditMode ? trip!.name : "";
   const depLocVal = isEditMode ? trip!.departureLocation : "";
   const arrLocVal = isEditMode ? trip!.arrivalLocation : "";
   const stopsVal = isEditMode
@@ -40,7 +40,7 @@ const NewTripFormPage = ({
     }
     const operatorId = getCookie("operatorId")!;
     const fd = new FormData(e.target as HTMLFormElement);
-    const title = fd.get("title");
+    const name = fd.get("name");
     const departureLocation = fd.get("departureLocation");
     const arrivalLocation = fd.get("arrivalLocation");
     const intermediateStops = fd.get("stops");
@@ -51,7 +51,7 @@ const NewTripFormPage = ({
     const amenities = fd.get("amenities");
     const additional = fd.get("additional");
     const data = {
-      title,
+      name,
       departureLocation,
       arrivalLocation,
       intermediateStops,
@@ -83,7 +83,7 @@ const NewTripFormPage = ({
         <div>
           <label>Display Name</label>
           <br />
-          <input type="text" name="title" defaultValue={titleVal} />
+          <input type="text" name="name" defaultValue={nameVal} />
         </div>
         <div>
           <label>Departure Location</label>

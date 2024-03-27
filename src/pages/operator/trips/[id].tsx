@@ -80,7 +80,7 @@ const details: React.FC<Props> = ({ trip }) => {
     <section>
       <div>
         <h4>Details</h4>
-        <div>Name: {_trip.title}</div>
+        <div>Name: {_trip.name}</div>
         <div>
           Route: {_trip.departureLocation} - {_trip.arrivalLocation}
         </div>

@@ -32,7 +32,7 @@ export default async function handler(
 
 function isExpectedPayload(body: any): body is TripEntryPayload {
   return (
-    typeof body.title === "string" &&
+    typeof body.name === "string" &&
     typeof body.departureLocation === "string" &&
     typeof body.arrivalLocation === "string" &&
     typeof body.intermediateStops === "string" &&
