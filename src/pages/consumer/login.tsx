@@ -3,6 +3,7 @@ import { UtilLib } from "@/lib/util";
 import { emailSchema, passwdSchema, unameSchema } from "@/lib/zod-schema";
 import { Auth } from "@/services/auth";
 import { $Enums } from "@prisma/client";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
@@ -80,6 +81,7 @@ const ConsumerLoginPage = () => {
           Login
         </button>
       </form>
+      <Link href="/consumer/signup">Sign Up</Link>
     </div>
   );
 };

@@ -34,6 +34,7 @@ export interface ConsumerSignUpPayload {
   name: string;
   dob: string;
   gender: string;
+  phone: string;
   email: string;
   passwd: string;
 }

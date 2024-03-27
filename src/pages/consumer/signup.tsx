@@ -27,6 +27,10 @@ const ConsumerSignUpPage = () => {
     initialValue: "",
     zodSchema: noneEmptySchema,
   });
+  const phoneFieldCtrl = useFieldController({
+    initialValue: "",
+    zodSchema: noneEmptySchema,
+  });
   const emailFieldCtrl = useFieldController({
     initialValue: "",
     zodSchema: emailSchema,
@@ -46,6 +50,7 @@ const ConsumerSignUpPage = () => {
       dobFieldCtrl.setValue("2000-01-01");
       genderFieldCtrl.setValue("male");
       emailFieldCtrl.setValue("foo@foo.com");
+      phoneFieldCtrl.setValue("+95912341234");
       passwdFieldCtrl.setValue("sixtyNine69)^");
       confirmFieldCtrl.setValue("sixtyNine69)^");
     }
@@ -81,6 +86,7 @@ const ConsumerSignUpPage = () => {
         !dobFieldCtrl.validity ||
         !genderFieldCtrl.validity ||
         !emailFieldCtrl.validity ||
+        !phoneFieldCtrl.validity ||
         !passwdFieldCtrl.validity ||
         !confirmFieldCtrl.validity ||
         !!unMatchErr;
@@ -92,6 +98,7 @@ const ConsumerSignUpPage = () => {
     dobFieldCtrl.validity,
     genderFieldCtrl.validity,
     emailFieldCtrl.validity,
+    phoneFieldCtrl.validity,
     passwdFieldCtrl.validity,
     confirmFieldCtrl.validity,
     unMatchErr,
@@ -108,6 +115,7 @@ const ConsumerSignUpPage = () => {
       name: nameFieldCtrl.value,
       dob: dobFieldCtrl.value,
       gender: genderFieldCtrl.value,
+      phone: phoneFieldCtrl.value,
       email: emailFieldCtrl.value,
       passwd: passwdFieldCtrl.value,
     };
@@ -164,6 +172,17 @@ const ConsumerSignUpPage = () => {
             <option value="female">Female</option>
           </select>
           {!genderFieldCtrl.validity && <span>{genderFieldCtrl.message}</span>}
+        </div>
+        <div>
+          <label>Phone</label>
+          <input
+            type="tel"
+            name="phone"
+            value={phoneFieldCtrl.value}
+            onChange={phoneFieldCtrl.onChange}
+            onFocus={phoneFieldCtrl.onFocus}
+          />
+          {!phoneFieldCtrl.validity && <span>{phoneFieldCtrl.message}</span>}
         </div>
         <div>
           <label>Email</label>

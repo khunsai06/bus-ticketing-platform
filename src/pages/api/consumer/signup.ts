@@ -6,7 +6,6 @@ import { ConsumerSignUpPayload } from "@/lib/types";
 import { UtilLib } from "@/lib/util";
 import { $Enums, Prisma } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import { object } from "zod";
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,7 +16,6 @@ export default async function handler(
     UtilLib.validateRequestMethod(req, [HttpVerb.POST]);
     if (!isExpectedPayload(payload))
       throw new ClientErr(400, "Invalid or missing request body.");
-    console.log(req.body);
     const hashedPasswd = await AuthLib.passwdHash(payload.passwd);
     const result = await prisma.credential.create({
       include: { consumer: true },
@@ -30,11 +28,11 @@ export default async function handler(
             name: payload.name,
             dob: new Date(payload.dob),
             gender: payload.gender,
+            phone: payload.phone,
           },
         },
       },
     });
-    console.log({ result });
     res.status(200).json({
       message: "Consumer and corresponding credential successfully created.",
     });
