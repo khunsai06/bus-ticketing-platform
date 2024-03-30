@@ -108,27 +108,28 @@ enum SeatStatus {
 }
 
 model Seat {
-  id            String         @id @default(cuid())
+  id            String        @id @default(cuid())
   number        String
   location      String[]
   features      String[]
   additional    String?
-  trip          Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip          Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
   tripId        String
-  status        SeatStatus     @default(FREE)
+  status        SeatStatus    @default(FREE)
   reservationId String?
   reservation   Reservation?
-  cancels       Cancellation[]
+  cancels       Cancellation?
 
   @@map("seats")
 }
 
 model Reservation {
   id         String   @id @default(cuid())
+  isCanceled Boolean  @default(false)
   createdAt  DateTime @default(now())
   consumer   Consumer @relation(fields: [consumerId], references: [id])
-  seat       Seat     @relation(fields: [seatId], references: [id])
   consumerId String
+  seat       Seat     @relation(fields: [seatId], references: [id])
   seatId     String   @unique
 
   @@map("reservations")
@@ -137,11 +138,12 @@ model Reservation {
 model Cancellation {
   id         String   @id @default(cuid())
   reason     String
+  isResolved Boolean  @default(false)
   createdAt  DateTime @default(now())
   consumer   Consumer @relation(fields: [consumerId], references: [id])
-  seat       Seat     @relation(fields: [seatId], references: [id])
   consumerId String
-  seatId     String
+  seat       Seat     @relation(fields: [seatId], references: [id])
+  seatId     String   @unique
 
   @@map("cancellations")
 }
