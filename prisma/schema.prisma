@@ -115,8 +115,8 @@ model Seat {
   additional    String?
   trip          Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
   tripId        String
-  reservationId String
   status        SeatStatus     @default(FREE)
+  reservationId String?
   reservation   Reservation?
   cancels       Cancellation[]
 

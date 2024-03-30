@@ -1,4 +1,4 @@
-import { type Seat, Trip, Operator } from "@prisma/client";
+import { Seat, Trip, Operator } from "@prisma/client";
 
 export type Trip2 = Omit<Trip, "departureTime" | "arrivalTime" | "price"> & {
   departureTime: string;
@@ -7,16 +7,18 @@ export type Trip2 = Omit<Trip, "departureTime" | "arrivalTime" | "price"> & {
 };
 
 export type Trip3 = Trip2 & {
+  seats: Seat[];
+};
+
+export type Trip4 = Trip3 & {
   operator: Operator;
 };
 
-export type Seat2 = Seat;
-
-export type CredentialPayload = {
+export interface CredentialPayload {
   uname?: string;
   email?: string;
   passwd: string;
-};
+}
 
 export interface TripEntryPayload {
   name: string;

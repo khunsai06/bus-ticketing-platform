@@ -17,16 +17,16 @@ export const passwdSchema = z
     message: "Password must contain at least one special character",
   });
 
-export const noneEmptySchema = z
+export const requiredSchema = z
   .string()
   .trim()
   .min(1, { message: "This field cannot be left blank." });
 
-export const emailSchema = noneEmptySchema.email({
+export const emailSchema = requiredSchema.email({
   message: "Please enter a valid email address.",
 });
 
-export const unameSchema = noneEmptySchema
+export const unameSchema = requiredSchema
   .min(4, {
     message: "Username must be at least 4 characters long.",
   })
@@ -34,7 +34,7 @@ export const unameSchema = noneEmptySchema
     message: "Username must be less than 20 characters.",
   });
 
-export const dateOfBirthSchema = noneEmptySchema.refine(
+export const dateOfBirthSchema = requiredSchema.refine(
   (val) => {
     const dob = moment(val, "YYYY-MM-DD");
     const today = moment();

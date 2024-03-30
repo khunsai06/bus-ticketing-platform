@@ -12,8 +12,6 @@ import {
 } from "./constants";
 
 const excludedEndPoints = [
-  "/test",
-  "/api/upload",
   "/operator/login",
   "/consumer/login",
   "/consumer/signup",

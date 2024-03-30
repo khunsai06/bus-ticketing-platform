@@ -17,12 +17,8 @@ const NewTripFormPage = ({
   const nameVal = isEditMode ? trip!.name : "";
   const depLocVal = isEditMode ? trip!.departureLocation : "";
   const arrLocVal = isEditMode ? trip!.arrivalLocation : "";
-  const stopsVal = isEditMode
-    ? UtilLib.arrayToCommaSeparatedString(trip!.intermediateStops)
-    : "";
-  const amensVal = isEditMode
-    ? UtilLib.arrayToCommaSeparatedString(trip!.amenities)
-    : "";
+  const stopsVal = isEditMode ? UtilLib.toString3(trip!.intermediateStops) : "";
+  const amensVal = isEditMode ? UtilLib.toString3(trip!.amenities) : "";
   const depTimeVal = isEditMode
     ? DatetimeLib.convertIsoToDatetimeLocal(trip!.departureTime)
     : "";
@@ -78,8 +74,8 @@ const NewTripFormPage = ({
     }
   };
   return (
-    <div className="hero is-fullheight p-5" onSubmit={handleSubmit}>
-      <form>
+    <div className="hero is-fullheight p-5">
+      <form onSubmit={handleSubmit}>
         <div>
           <label>Display Name</label>
           <br />

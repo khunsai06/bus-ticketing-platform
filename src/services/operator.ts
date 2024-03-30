@@ -34,13 +34,30 @@ export namespace OperatorServices {
     static async getMany(operatorId: string) {
       return fetch(`/api/operator/get-trips?operatorId=${operatorId}`);
     }
+    static async getOne(id: string) {
+      return fetch(`/api/operator/get-trip?id=${id}`);
+    }
   }
 
   export class SeatManager {
-    static async generate(tripId: string, count: number) {}
+    static async create(tripId: string, payload: any) {
+      return fetch(`/api/operator/entry-seat?tripId=${tripId}`, {
+        method: HttpVerb.POST,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+    }
     static async xOperation(id: string, ops: XSeatOps) {
-      return await fetch(`/api/operator/x-seat-ops?id=${id}&ops=${ops}`, {
-        method: HttpVerb.PATCH,
+      const method = {
+        [XSeatOps.DELETE]: HttpVerb.DELETE,
+        [XSeatOps.FREE]: HttpVerb.PATCH,
+        [XSeatOps.LOCK]: HttpVerb.PATCH,
+        [XSeatOps.RESERVE]: HttpVerb.PATCH,
+      }[ops];
+      return fetch(`/api/operator/x-seat-ops?id=${id}&ops=${ops}`, {
+        method,
       });
     }
     static async getMany(tripId: string) {

@@ -9,7 +9,7 @@ const TripItem2: FC<{ trip: Trip2 }> = ({ trip }) => {
   const goToDetails = () => rt.push(detailUrl);
   return (
     <tr onClick={goToDetails} style={{ cursor: "pointer" }}>
-      <td>{trip.title}</td>
+      <td>{trip.name}</td>
       <td>{trip.departureLocation}</td>
       <td>{trip.arrivalLocation}</td>
       <td>{DatetimeLib.formatDateForDisplay(trip.departureTime)}</td>

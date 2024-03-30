@@ -86,8 +86,8 @@ CREATE TABLE "seats" (
     "features" TEXT[],
     "additional" TEXT,
     "tripId" TEXT NOT NULL,
-    "reservationId" TEXT NOT NULL,
     "status" "SeatStatus" NOT NULL DEFAULT 'FREE',
+    "reservationId" TEXT,
 
     CONSTRAINT "seats_pkey" PRIMARY KEY ("id")
 );

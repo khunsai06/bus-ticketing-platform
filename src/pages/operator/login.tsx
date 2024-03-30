@@ -1,4 +1,4 @@
-import useFieldController from "@/hooks/useFieldController";
+import useField from "@/hooks/useField";
 import { UtilLib } from "@/lib/util";
 import { passwdSchema, unameSchema } from "@/lib/zod-schema";
 import { Auth } from "@/services/auth";
@@ -9,12 +9,12 @@ import React from "react";
 const isDev = process.env.NODE_ENV === "development";
 
 const Page = () => {
-  const unameInputCtrl = useFieldController({
+  const unameInputCtrl = useField({
     initialValue: isDev ? "johndoe" : "",
     zodSchema: unameSchema,
   });
 
-  const passwdInputCtrl = useFieldController({
+  const passwdInputCtrl = useField({
     initialValue: isDev ? "sixtyNine69)^" : "",
     zodSchema: passwdSchema,
   });

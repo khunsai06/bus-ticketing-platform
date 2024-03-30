@@ -8,21 +8,18 @@ type Params = {
   onError?: (e: ZodError) => void;
 };
 
-export default function useFieldController({
-  initialValue,
-  zodSchema,
-  onError,
-}: Params) {
+export default function useField({ initialValue, zodSchema, onError }: Params) {
   const [value, setValue] = useState<State>(initialValue);
   const [isFocus, setIsFocus] = useState<boolean>(false);
   const [validity, setValidity] = useState(false);
-  const [message, setMessage] = useState<string>("");
+  const [message, setMessage] = useState<string>();
 
   useEffect(() => {
     if (!isFocus) return;
     try {
       zodSchema.parse(value);
       setValidity(true);
+      setMessage(undefined);
     } catch (error) {
       if (error instanceof ZodError) {
         onError?.(error);
@@ -35,7 +32,9 @@ export default function useFieldController({
   }, [value, isFocus]);
 
   const onChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => setValue(e.target.value);
 
   const reset = () => {
@@ -46,6 +45,7 @@ export default function useFieldController({
   };
 
   const onFocus = () => setIsFocus(true);
+  const validate = () => setIsFocus(true);
 
   return {
     value,
@@ -53,6 +53,7 @@ export default function useFieldController({
     validity,
     message,
     setValue,
+    validate,
     reset,
     onChange,
     onFocus,

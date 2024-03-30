@@ -51,7 +51,7 @@ export namespace AuthLib {
         .setProtectedHeader({ alg: "HS256", typ: "JWT" })
         .setSubject(payload.cid)
         .setIssuedAt()
-        .setExpirationTime("30 minutes from now")
+        .setExpirationTime("24 hours from now")
         .setJti(jti)
         .sign(new TextEncoder().encode(process.env.SECRET));
     } catch (error) {

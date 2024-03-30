@@ -9,17 +9,17 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const operatorId = req.query.operatorId;
-    if (!isString(operatorId))
+    const id = req.query.id;
+    if (!isString(id))
       throw new ClientErr(
         400,
-        "Invalid or missing request query parameter(s): [operatorId]."
+        "Invalid or missing request query parameter(s): [id]."
       );
-    const trips = await prisma.trip.findMany({
-      where: { operatorId },
-      orderBy: { id: "desc" },
+    const result = await prisma.trip.findUniqueOrThrow({
+      where: { id },
+      include: { seats: { orderBy: { id: "desc" } } },
     });
-    res.status(200).json(trips);
+    res.status(200).json(result);
   } catch (error) {
     UtilLib.handleErrorAndRespond(error, res);
   }

@@ -1,31 +1,39 @@
-import useFieldController from "@/hooks/useFieldController";
+import Navbar3 from "@/components/consumer/Navbar3";
+import useField from "@/hooks/useField";
+import Notification from "@/components/common/Notification";
 import { UtilLib } from "@/lib/util";
 import { emailSchema, passwdSchema, unameSchema } from "@/lib/zod-schema";
 import { Auth } from "@/services/auth";
 import { $Enums } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
-
-const isDev = process.env.NODE_ENV === "development";
+import React, { useEffect, useState } from "react";
+import SimpleInput from "@/components/SimpleInput";
 
 const ConsumerLoginPage = () => {
-  const emailFieldCtrl = useFieldController({
+  const emailFieldCtrl = useField({
     initialValue: "",
     zodSchema: emailSchema,
   });
 
-  const passwdFieldCtrl = useFieldController({
+  const passwdFieldCtrl = useField({
     initialValue: "",
     zodSchema: passwdSchema,
   });
 
   useEffect(() => {
-    if (isDev) {
+    if (process.env.NODE_ENV === "development") {
       emailFieldCtrl.setValue("foo@foo.com");
       passwdFieldCtrl.setValue("sixtyNine69)^");
+      emailFieldCtrl.validate();
+      passwdFieldCtrl.validate();
     }
   }, []);
+
+  const [isAnyFieldInvalid, setIsAnyFieldInvalid] = useState(true);
+  useEffect(() => {
+    setIsAnyFieldInvalid(!emailFieldCtrl.validity || !passwdFieldCtrl.validity);
+  }, [emailFieldCtrl.validity, passwdFieldCtrl.validity]);
 
   const [responseErr, setResponseErr] = React.useState("");
   const clearResponseErr = () => setResponseErr("");
@@ -33,7 +41,7 @@ const ConsumerLoginPage = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailFieldCtrl.validity || !passwdFieldCtrl.validity) return;
+    if (isAnyFieldInvalid) return;
     const email = emailFieldCtrl.value;
     const passwd = passwdFieldCtrl.value;
     const res = await Auth.login({ email, passwd }, $Enums.UserType.CONSUMER);
@@ -47,42 +55,64 @@ const ConsumerLoginPage = () => {
   };
 
   return (
-    <div>
-      {responseErr && (
-        <p>
-          {responseErr} <button onClick={clearResponseErr}>clear error</button>
-        </p>
-      )}
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Email</label>
-          <input
-            type="text"
-            value={emailFieldCtrl.value}
-            onChange={emailFieldCtrl.onChange}
-            onFocus={emailFieldCtrl.onFocus}
-          />
-          {!emailFieldCtrl.validity && <span>{emailFieldCtrl.message}</span>}
+    <>
+      <Navbar3 />
+      <main className="section">
+        <div className="columns is-centered">
+          <div className="column is-half-tablet is-one-quarter-widescreen">
+            <form onSubmit={handleLogin}>
+              <h4 className="title is-4">Sign in to your account.</h4>
+              {responseErr && (
+                <Notification
+                  className="is-danger is-light"
+                  onDelete={clearResponseErr}
+                >
+                  {responseErr}
+                </Notification>
+              )}
+              <SimpleInput
+                label="Email*"
+                type="email"
+                value={emailFieldCtrl.value}
+                onChange={emailFieldCtrl.onChange}
+                onFocus={emailFieldCtrl.onFocus}
+                help={emailFieldCtrl.message}
+              />
+              <SimpleInput
+                label="Password*"
+                type="password"
+                value={passwdFieldCtrl.value}
+                onChange={passwdFieldCtrl.onChange}
+                onFocus={passwdFieldCtrl.onFocus}
+                help={passwdFieldCtrl.message}
+              />
+              <div className="field">
+                <div className="control">
+                  <label className="checkbox">
+                    <input type="checkbox" checked />
+                    <span> Remember me</span>
+                  </label>
+                </div>
+              </div>
+              <div className="field buttons">
+                <button
+                  className="button is-link"
+                  type="submit"
+                  disabled={isAnyFieldInvalid}
+                >
+                  Login
+                </button>
+              </div>
+            </form>
+            <hr />
+            <span>
+              Don't have an account?{" "}
+              <Link href="/consumer/signup">Sign up</Link>
+            </span>
+          </div>
         </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="text"
-            value={passwdFieldCtrl.value}
-            onChange={passwdFieldCtrl.onChange}
-            onFocus={passwdFieldCtrl.onFocus}
-          />
-          {!passwdFieldCtrl.validity && <span>{passwdFieldCtrl.message}</span>}
-        </div>
-        <button
-          type="submit"
-          disabled={!emailFieldCtrl.validity || !passwdFieldCtrl.validity}
-        >
-          Login
-        </button>
-      </form>
-      <Link href="/consumer/signup">Sign Up</Link>
-    </div>
+      </main>
+    </>
   );
 };
 

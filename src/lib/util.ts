@@ -3,16 +3,41 @@ import { ClientErr, ServerErr } from "./errors";
 import { NextApiRequest, NextApiResponse } from "next/types";
 
 export namespace UtilLib {
-  export function concatenateStrings(list: string[]): string {
+  export function capitalize(str: string) {
+    return str.replace(/\b\w/g, function (char) {
+      return char.toUpperCase();
+    });
+  }
+  /**
+   * Converts an array of strings to a single space-separated string.
+   *
+   * @param {string[]} list - The array of strings to convert.
+   * @returns {string} The space-separated string.
+   */
+  export function toString2(list: string[]): string {
     return list.join(" ");
   }
-  export function commaSeparatedStringToArray(inputString: string): string[] {
-    const arrayOfStrings = inputString.split(",").map((str) => str.trim());
-    return arrayOfStrings;
-  }
-  export function arrayToCommaSeparatedString(inputArray: string[]): string {
+
+  /**
+   * Converts an array of strings to a single comma-separated string.
+   *
+   * @param {string[]} inputArray - The array of strings to convert.
+   * @returns {string} The comma-separated string.
+   */
+  export function toString3(inputArray: string[]): string {
     const commaSeparatedString = inputArray.join(", ");
     return commaSeparatedString;
+  }
+
+  /**
+   * Converts a comma-separated string into an array of strings.
+   *
+   * @param {string} inputString - The comma-separated string to convert.
+   * @returns {string[]} The array of strings.
+   */
+  export function toArray2(inputString: string): string[] {
+    const arrayOfStrings = inputString.split(",").map((str) => str.trim());
+    return arrayOfStrings;
   }
 
   export function validateRequestMethod(

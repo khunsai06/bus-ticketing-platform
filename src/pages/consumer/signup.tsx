@@ -1,11 +1,15 @@
-import useFieldController from "@/hooks/useFieldController";
+import SimpleInput from "@/components/SimpleInput";
+import SimpleSelect from "@/components/SimpleSelect";
+import Notification from "@/components/common/Notification";
+import Navbar3 from "@/components/consumer/Navbar3";
+import useField from "@/hooks/useField";
 import { DatetimeLib } from "@/lib/datetime";
 import { UtilLib } from "@/lib/util";
 import {
   confirmPasswordSchema,
   dateOfBirthSchema,
   emailSchema,
-  noneEmptySchema,
+  requiredSchema,
   passwdSchema,
 } from "@/lib/zod-schema";
 import { ConsumerServices } from "@/services/consumer";
@@ -15,37 +19,39 @@ import React, { useEffect, useState } from "react";
 import { ZodError } from "zod";
 
 const ConsumerSignUpPage = () => {
-  const nameFieldCtrl = useFieldController({
+  const nameFieldCtrl = useField({
     initialValue: "",
-    zodSchema: noneEmptySchema,
+    zodSchema: requiredSchema,
   });
-  const dobFieldCtrl = useFieldController({
+  const dobFieldCtrl = useField({
     initialValue: "",
     zodSchema: dateOfBirthSchema,
   });
-  const genderFieldCtrl = useFieldController({
+  const genderFieldCtrl = useField({
     initialValue: "",
-    zodSchema: noneEmptySchema,
+    zodSchema: requiredSchema,
   });
-  const phoneFieldCtrl = useFieldController({
+  const phoneFieldCtrl = useField({
     initialValue: "",
-    zodSchema: noneEmptySchema,
+    zodSchema: requiredSchema,
   });
-  const emailFieldCtrl = useFieldController({
+  const emailFieldCtrl = useField({
     initialValue: "",
     zodSchema: emailSchema,
   });
-  const passwdFieldCtrl = useFieldController({
+  const passwdFieldCtrl = useField({
     initialValue: "",
     zodSchema: passwdSchema,
   });
-  const confirmFieldCtrl = useFieldController({
+  const confirmFieldCtrl = useField({
     initialValue: "",
     zodSchema: passwdSchema,
   });
 
+  const [tNCAgreement, setTNCAgreement] = useState(false);
+
   useEffect(() => {
-    if (true) {
+    if (process.env.NODE_ENV === "development") {
       nameFieldCtrl.setValue("John Doe");
       dobFieldCtrl.setValue("2000-01-01");
       genderFieldCtrl.setValue("male");
@@ -53,6 +59,13 @@ const ConsumerSignUpPage = () => {
       phoneFieldCtrl.setValue("+95912341234");
       passwdFieldCtrl.setValue("sixtyNine69)^");
       confirmFieldCtrl.setValue("sixtyNine69)^");
+      nameFieldCtrl.validate();
+      dobFieldCtrl.validate();
+      genderFieldCtrl.validate();
+      emailFieldCtrl.validate();
+      phoneFieldCtrl.validate();
+      passwdFieldCtrl.validate();
+      confirmFieldCtrl.validate();
     }
   }, []);
 
@@ -80,19 +93,17 @@ const ConsumerSignUpPage = () => {
 
   const [isAnyFieldInvalid, setIsAnyFieldInvalid] = useState(true);
   useEffect(() => {
-    const checkValidity = () => {
-      const validity =
-        !nameFieldCtrl.validity ||
+    setIsAnyFieldInvalid(
+      !nameFieldCtrl.validity ||
         !dobFieldCtrl.validity ||
         !genderFieldCtrl.validity ||
         !emailFieldCtrl.validity ||
         !phoneFieldCtrl.validity ||
         !passwdFieldCtrl.validity ||
         !confirmFieldCtrl.validity ||
-        !!unMatchErr;
-      setIsAnyFieldInvalid(validity);
-    };
-    checkValidity();
+        !!unMatchErr ||
+        !tNCAgreement
+    );
   }, [
     nameFieldCtrl.validity,
     dobFieldCtrl.validity,
@@ -102,6 +113,7 @@ const ConsumerSignUpPage = () => {
     passwdFieldCtrl.validity,
     confirmFieldCtrl.validity,
     unMatchErr,
+    tNCAgreement,
   ]);
 
   const [responseErr, setResponseErr] = React.useState("");
@@ -129,103 +141,123 @@ const ConsumerSignUpPage = () => {
     });
   };
   return (
-    <div>
-      {responseErr && (
-        <p>
-          {responseErr} <button onClick={clearResponseErr}>clear error</button>
-        </p>
-      )}
-      <form onSubmit={signUpHandler}>
-        <div>
-          <label>Name</label>
-          <input
-            type="text"
-            name="name"
-            value={nameFieldCtrl.value}
-            onChange={nameFieldCtrl.onChange}
-            onFocus={nameFieldCtrl.onFocus}
-          />
-          {!nameFieldCtrl.validity && <span>{nameFieldCtrl.message}</span>}
+    <>
+      <Navbar3 />
+      <main className="section">
+        <div className="columns is-centered">
+          <div className="column is-half-tablet is-one-quarter-widescreen">
+            <form onSubmit={signUpHandler}>
+              <h4 className="title is-4">Create your account.</h4>
+              {responseErr && (
+                <Notification
+                  className="is-danger is-light"
+                  onDelete={clearResponseErr}
+                >
+                  {responseErr}
+                </Notification>
+              )}
+              <SimpleInput
+                label="Full Name*"
+                type="text"
+                onChange={nameFieldCtrl.onChange}
+                onFocus={nameFieldCtrl.onFocus}
+                value={nameFieldCtrl.value}
+                help={nameFieldCtrl.message}
+              />
+              <div className="field is-grouped mb-0">
+                <SimpleInput
+                  label="Birthday*"
+                  type="date"
+                  max={DatetimeLib.latestDate16YearsAgo()}
+                  onChange={dobFieldCtrl.onChange}
+                  onFocus={dobFieldCtrl.onFocus}
+                  value={dobFieldCtrl.value}
+                  help={dobFieldCtrl.message}
+                />
+                <SimpleSelect
+                  label="Gender*"
+                  onChange={genderFieldCtrl.onChange}
+                  onFocus={genderFieldCtrl.onFocus}
+                  value={genderFieldCtrl.value}
+                  help={genderFieldCtrl.message}
+                >
+                  <option value="">None</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </SimpleSelect>
+              </div>
+              <SimpleInput
+                label="Phone*"
+                type="tel"
+                onChange={phoneFieldCtrl.onChange}
+                onFocus={phoneFieldCtrl.onFocus}
+                value={phoneFieldCtrl.value}
+                help={phoneFieldCtrl.message}
+              />
+              <SimpleInput
+                label="Email*"
+                type="text"
+                onChange={emailFieldCtrl.onChange}
+                onFocus={emailFieldCtrl.onFocus}
+                value={emailFieldCtrl.value}
+                help={emailFieldCtrl.message}
+              />
+              <SimpleInput
+                label="Password*"
+                type="password"
+                onChange={passwdFieldCtrl.onChange}
+                onFocus={passwdFieldCtrl.onFocus}
+                value={passwdFieldCtrl.value}
+                help={passwdFieldCtrl.message}
+              />
+              <SimpleInput
+                label="Confirm Password*"
+                type="password"
+                onChange={confirmFieldCtrl.onChange}
+                onFocus={confirmFieldCtrl.onFocus}
+                value={confirmFieldCtrl.value}
+                help={
+                  !confirmFieldCtrl.validity
+                    ? confirmFieldCtrl.message
+                    : confirmFieldCtrl.validity && unMatchErr
+                    ? unMatchErr
+                    : undefined
+                }
+              />
+              <div className="field">
+                <div className="control">
+                  <label className="checkbox">
+                    <input
+                      type="checkbox"
+                      checked={tNCAgreement}
+                      onChange={() => {
+                        setTNCAgreement(!tNCAgreement);
+                      }}
+                    />
+                    <span> I agree to the </span>
+                    <a href="#">terms and conditions</a>
+                  </label>
+                </div>
+              </div>
+              <div className="field buttons">
+                <button
+                  className="button is-link"
+                  type="submit"
+                  disabled={isAnyFieldInvalid}
+                >
+                  Sign Up
+                </button>
+              </div>
+            </form>
+            <hr />
+            <span>
+              Already have an account?{" "}
+              <Link href="/consumer/login">Log in</Link>
+            </span>
+          </div>
         </div>
-        <div>
-          <label>Birthday</label>
-          <input
-            type="date"
-            name="dob"
-            max={DatetimeLib.latestDate16YearsAgo()}
-            value={dobFieldCtrl.value}
-            onChange={dobFieldCtrl.onChange}
-            onFocus={dobFieldCtrl.onFocus}
-          />
-          {!dobFieldCtrl.validity && <span>{dobFieldCtrl.message}</span>}
-        </div>
-        <div>
-          <label>Gender</label>
-          <select
-            name="gender"
-            value={genderFieldCtrl.value}
-            onChange={genderFieldCtrl.onChange}
-            onFocus={genderFieldCtrl.onFocus}
-          >
-            <option value="">N/A</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-          {!genderFieldCtrl.validity && <span>{genderFieldCtrl.message}</span>}
-        </div>
-        <div>
-          <label>Phone</label>
-          <input
-            type="tel"
-            name="phone"
-            value={phoneFieldCtrl.value}
-            onChange={phoneFieldCtrl.onChange}
-            onFocus={phoneFieldCtrl.onFocus}
-          />
-          {!phoneFieldCtrl.validity && <span>{phoneFieldCtrl.message}</span>}
-        </div>
-        <div>
-          <label>Email</label>
-          <input
-            type="text"
-            name="email"
-            value={emailFieldCtrl.value}
-            onChange={emailFieldCtrl.onChange}
-            onFocus={emailFieldCtrl.onFocus}
-          />
-          {!emailFieldCtrl.validity && <span>{emailFieldCtrl.message}</span>}
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="text"
-            name="passwd"
-            value={passwdFieldCtrl.value}
-            onChange={passwdFieldCtrl.onChange}
-            onFocus={passwdFieldCtrl.onFocus}
-          />
-          {!passwdFieldCtrl.validity && <span>{passwdFieldCtrl.message}</span>}
-        </div>
-        <div>
-          <label>Confirm Password</label>
-          <input
-            type="text"
-            name="confirm"
-            value={confirmFieldCtrl.value}
-            onChange={confirmFieldCtrl.onChange}
-            onFocus={confirmFieldCtrl.onFocus}
-          />
-          {!confirmFieldCtrl.validity && (
-            <span>{confirmFieldCtrl.message}</span>
-          )}
-          {confirmFieldCtrl.validity && unMatchErr && <span>{unMatchErr}</span>}
-        </div>
-        <button type="submit" disabled={isAnyFieldInvalid}>
-          Sign Up
-        </button>
-      </form>
-      <Link href="/consumer/login">Login</Link>
-    </div>
+      </main>
+    </>
   );
 };
 

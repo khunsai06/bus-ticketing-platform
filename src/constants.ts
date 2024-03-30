@@ -3,8 +3,10 @@ import { $Enums } from "@prisma/client";
 export const iconSize = 0.8;
 
 export enum XSeatOps {
+  FREE = "FREE",
   LOCK = "LOCK",
-  OPEN = "OPEN",
+  DELETE = "DELETE",
+  RESERVE = "RESERVE",
 }
 
 export enum XTripOps {

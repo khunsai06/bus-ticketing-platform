@@ -62,8 +62,8 @@ async function processTripCreateRequest(req: NextApiRequest) {
   const data = {
     departureTime: new Date(departureTime),
     arrivalTime: new Date(arrivalTime),
-    intermediateStops: UtilLib.commaSeparatedStringToArray(intermediateStops),
-    amenities: UtilLib.commaSeparatedStringToArray(amenities),
+    intermediateStops: UtilLib.toArray2(intermediateStops),
+    amenities: UtilLib.toArray2(amenities),
     ...args,
     operatorId,
   };
@@ -87,8 +87,8 @@ async function processTripUpdateRequest(req: NextApiRequest) {
   const data = {
     departureTime: new Date(departureTime),
     arrivalTime: new Date(arrivalTime),
-    intermediateStops: UtilLib.commaSeparatedStringToArray(intermediateStops),
-    amenities: UtilLib.commaSeparatedStringToArray(amenities),
+    intermediateStops: UtilLib.toArray2(intermediateStops),
+    amenities: UtilLib.toArray2(amenities),
     ...args,
   };
   return prisma.trip.update({ where: { id }, data });
