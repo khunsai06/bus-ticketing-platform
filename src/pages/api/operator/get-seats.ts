@@ -1,8 +1,8 @@
 import { ClientErr } from "@/lib/errors";
-import { isString } from "@/lib/guards";
 import prisma from "@/lib/prisma-client";
 import { UtilLib } from "@/lib/util";
 import { NextApiRequest, NextApiResponse } from "next";
+import { isString } from "node:util";
 
 export default async function handler(
   req: NextApiRequest,

@@ -22,16 +22,19 @@ async function main() {
     },
   });
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     await prisma.trip.create({
       data: {
         operatorId: operator.id,
         name: faker.lorem.words({ min: 2, max: 5 }),
-        departureLocation: faker.location.city(),
-        arrivalLocation: faker.location.city(),
-        intermediateStops: faker.helpers.multiple(() => faker.location.city(), {
-          count: { min: 4, max: 8 },
-        }),
+        departureLocation: faker.helpers.arrayElement(Cities),
+        arrivalLocation: faker.helpers.arrayElement(Cities),
+        intermediateStops: faker.helpers.multiple(
+          () => faker.lorem.words({ min: 1, max: 2 }),
+          {
+            count: { min: 4, max: 8 },
+          }
+        ),
         departureTime: moment().toDate(),
         distance: faker.number.float({ min: 10, max: 100, fractionDigits: 2 }),
         arrivalTime: moment()
@@ -81,6 +84,18 @@ main()
     process.exit(1);
   });
 
+const Cities: string[] = [
+  "Yangon",
+  "Mandalay",
+  "Naypyidaw",
+  "Bago",
+  "Mawlamyine",
+  "Taunggyi",
+  "Pyay",
+  "Myitkyina",
+  "Magway",
+  "Pathein",
+];
 const busAmenities: string[] = [
   "Wi-Fi",
   "Power outlets/USB ports",

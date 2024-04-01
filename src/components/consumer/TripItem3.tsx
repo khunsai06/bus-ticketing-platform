@@ -65,7 +65,7 @@ const TripItem3: React.FC<{ trip: Trip4 }> = ({ trip }) => {
                 <sub> per seat</sub>
               </span>
             </div>
-            <div className="field buttons">
+            <div className="field buttons ">
               <button className="button is-link" onClick={goToSeatSelection}>
                 Select Trip
               </button>

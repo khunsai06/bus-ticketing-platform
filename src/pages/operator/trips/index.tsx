@@ -101,7 +101,7 @@ const TripsPage = ({
         <input type="date" name="date" onChange={handleFilterChange} />
       </section>
       <hr />
-      <table>
+      <table className="table">
         <thead>
           <tr>
             <th>Name</th>

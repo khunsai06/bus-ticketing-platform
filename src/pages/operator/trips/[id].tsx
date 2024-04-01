@@ -1,5 +1,4 @@
-// import { isString } from "@/lib/guards";
-import Aside from "@/components/Aside";
+import Aside from "@/components/operator/Aside";
 import SeatEntryDialog from "@/components/operator/SeatEntryDialog";
 import SeatItem2 from "@/components/operator/SeatItem2";
 import { XTripOps } from "@/constants";

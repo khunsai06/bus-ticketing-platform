@@ -1,7 +1,8 @@
 import { XSeatOps } from "@/constants";
+import prisma from "@/lib/prisma-client";
 import { UtilLib } from "@/lib/util";
 import { OperatorServices } from "@/services/operator";
-import { $Enums, Seat } from "@prisma/client";
+import { $Enums, Prisma, Seat } from "@prisma/client";
 import { FC } from "react";
 
 type Props = {
@@ -16,7 +17,7 @@ const SeatItem2: FC<Props> = ({ seat, tripStatus, refetch }) => {
   const launched = tripStatus === "LAUNCHED";
   const withdrawn = tripStatus === "WITHDRAWN";
   const reserved = seat.status === "RESERVED";
-  const disableAction1 = withdrawn || reserved || seat.reservationId !== null;
+  const disableAction1 = withdrawn || reserved;
   const disableAction2 = launched || withdrawn;
 
   const lockSeat = async () => {

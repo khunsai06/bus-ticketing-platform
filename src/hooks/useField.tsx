@@ -5,31 +5,30 @@ type State = string;
 type Params = {
   initialValue: State;
   zodSchema: ZodSchema<State>;
-  onError?: (e: ZodError) => void;
 };
 
-export default function useField({ initialValue, zodSchema, onError }: Params) {
+export default function useField({ initialValue, zodSchema }: Params) {
   const [value, setValue] = useState<State>(initialValue);
-  const [isFocus, setIsFocus] = useState<boolean>(false);
+  const [isValidationAllowed, setIsValidationAllowed] =
+    useState<boolean>(false);
   const [validity, setValidity] = useState(false);
   const [message, setMessage] = useState<string>();
 
   useEffect(() => {
-    if (!isFocus) return;
+    if (!isValidationAllowed) return;
     try {
       zodSchema.parse(value);
       setValidity(true);
       setMessage(undefined);
     } catch (error) {
       if (error instanceof ZodError) {
-        onError?.(error);
         setValidity(false);
         setMessage(error.errors[0].message);
       } else {
         throw error;
       }
     }
-  }, [value, isFocus]);
+  }, [value, isValidationAllowed]);
 
   const onChange = (
     e: React.ChangeEvent<
@@ -39,23 +38,26 @@ export default function useField({ initialValue, zodSchema, onError }: Params) {
 
   const reset = () => {
     setValue("");
-    setIsFocus(false);
-    setValidity(false);
     setMessage("");
+    setValidity(false);
+    setIsValidationAllowed(false);
   };
 
-  const onFocus = () => setIsFocus(true);
-  const validate = () => setIsFocus(true);
+  const setMockValue = (newValue: State) => {
+    setIsValidationAllowed(true);
+    setValue(newValue);
+  };
+  const onFocus = () => setIsValidationAllowed(true);
+  const validate = () => setIsValidationAllowed(true);
 
   return {
     value,
-    isFocus,
     validity,
     message,
-    setValue,
-    validate,
-    reset,
     onChange,
     onFocus,
+    setMockValue,
+    validate,
+    reset,
   };
 }

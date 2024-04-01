@@ -85,9 +85,8 @@ CREATE TABLE "seats" (
     "location" TEXT[],
     "features" TEXT[],
     "additional" TEXT,
-    "tripId" TEXT NOT NULL,
     "status" "SeatStatus" NOT NULL DEFAULT 'FREE',
-    "reservationId" TEXT,
+    "tripId" TEXT NOT NULL,
 
     CONSTRAINT "seats_pkey" PRIMARY KEY ("id")
 );
@@ -95,6 +94,7 @@ CREATE TABLE "seats" (
 -- CreateTable
 CREATE TABLE "reservations" (
     "id" TEXT NOT NULL,
+    "isCanceled" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "consumerId" TEXT NOT NULL,
     "seatId" TEXT NOT NULL,
@@ -106,6 +106,7 @@ CREATE TABLE "reservations" (
 CREATE TABLE "cancellations" (
     "id" TEXT NOT NULL,
     "reason" TEXT NOT NULL,
+    "isResolved" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "consumerId" TEXT NOT NULL,
     "seatId" TEXT NOT NULL,
@@ -136,6 +137,9 @@ CREATE UNIQUE INDEX "operators_registrationEmail_key" ON "operators"("registrati
 
 -- CreateIndex
 CREATE UNIQUE INDEX "reservations_seatId_key" ON "reservations"("seatId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "cancellations_seatId_key" ON "cancellations"("seatId");
 
 -- AddForeignKey
 ALTER TABLE "consumers" ADD CONSTRAINT "consumers_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -74,6 +74,12 @@ model Operator {
   @@map("operators")
 }
 
+enum TripStatus {
+  IDLE
+  LAUNCHED
+  WITHDRAWN
+}
+
 model Trip {
   id                String     @id @default(cuid())
   name              String
@@ -95,12 +101,6 @@ model Trip {
   @@map("trips")
 }
 
-enum TripStatus {
-  IDLE
-  LAUNCHED
-  WITHDRAWN
-}
-
 enum SeatStatus {
   FREE
   LOCKED
@@ -108,17 +108,16 @@ enum SeatStatus {
 }
 
 model Seat {
-  id            String        @id @default(cuid())
-  number        String
-  location      String[]
-  features      String[]
-  additional    String?
-  trip          Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId        String
-  status        SeatStatus    @default(FREE)
-  reservationId String?
-  reservation   Reservation?
-  cancels       Cancellation?
+  id           String        @id @default(cuid())
+  number       String
+  location     String[]
+  features     String[]
+  additional   String?
+  status       SeatStatus    @default(FREE)
+  trip         Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId       String
+  reservation  Reservation?
+  cancellation Cancellation?
 
   @@map("seats")
 }

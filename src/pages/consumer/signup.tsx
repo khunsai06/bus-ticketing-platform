@@ -52,42 +52,31 @@ const ConsumerSignUpPage = () => {
 
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      nameFieldCtrl.setValue("John Doe");
-      dobFieldCtrl.setValue("2000-01-01");
-      genderFieldCtrl.setValue("male");
-      emailFieldCtrl.setValue("foo@foo.com");
-      phoneFieldCtrl.setValue("+95912341234");
-      passwdFieldCtrl.setValue("sixtyNine69)^");
-      confirmFieldCtrl.setValue("sixtyNine69)^");
-      nameFieldCtrl.validate();
-      dobFieldCtrl.validate();
-      genderFieldCtrl.validate();
-      emailFieldCtrl.validate();
-      phoneFieldCtrl.validate();
-      passwdFieldCtrl.validate();
-      confirmFieldCtrl.validate();
+      nameFieldCtrl.setMockValue("John Doe");
+      dobFieldCtrl.setMockValue("2000-01-01");
+      genderFieldCtrl.setMockValue("male");
+      emailFieldCtrl.setMockValue("foo@foo.com");
+      phoneFieldCtrl.setMockValue("+95912341234");
+      passwdFieldCtrl.setMockValue("sixtyNine69)^");
+      confirmFieldCtrl.setMockValue("sixtyNine69)^");
     }
   }, []);
 
-  const [unMatchErr, setUnMatchErr] = useState("");
+  const [passwdMismatchErr, setPasswdMismatchErr] = useState<string>();
   useEffect(() => {
     try {
-      if (confirmFieldCtrl.isFocus && confirmFieldCtrl.validity) {
-        confirmPasswordSchema.parse({
-          passwd: passwdFieldCtrl.value,
-          confirm: confirmFieldCtrl.value,
-        });
-        setUnMatchErr("");
-      }
+      if (!confirmFieldCtrl.validity) return;
+      confirmPasswordSchema.parse({
+        passwd: passwdFieldCtrl.value,
+        confirm: confirmFieldCtrl.value,
+      });
+      setPasswdMismatchErr(undefined);
     } catch (error) {
-      if (error instanceof ZodError) {
-        setUnMatchErr(error.errors[0].message);
-      }
+      setPasswdMismatchErr((error as ZodError).errors[0].message);
     }
   }, [
     passwdFieldCtrl.value,
     confirmFieldCtrl.value,
-    confirmFieldCtrl.isFocus,
     confirmFieldCtrl.validity,
   ]);
 
@@ -101,7 +90,7 @@ const ConsumerSignUpPage = () => {
         !phoneFieldCtrl.validity ||
         !passwdFieldCtrl.validity ||
         !confirmFieldCtrl.validity ||
-        !!unMatchErr ||
+        !!passwdMismatchErr ||
         !tNCAgreement
     );
   }, [
@@ -112,7 +101,7 @@ const ConsumerSignUpPage = () => {
     phoneFieldCtrl.validity,
     passwdFieldCtrl.validity,
     confirmFieldCtrl.validity,
-    unMatchErr,
+    passwdMismatchErr,
     tNCAgreement,
   ]);
 
@@ -219,8 +208,8 @@ const ConsumerSignUpPage = () => {
                 help={
                   !confirmFieldCtrl.validity
                     ? confirmFieldCtrl.message
-                    : confirmFieldCtrl.validity && unMatchErr
-                    ? unMatchErr
+                    : confirmFieldCtrl.validity && passwdMismatchErr
+                    ? passwdMismatchErr
                     : undefined
                 }
               />

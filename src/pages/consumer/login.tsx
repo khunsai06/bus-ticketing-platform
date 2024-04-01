@@ -23,10 +23,8 @@ const ConsumerLoginPage = () => {
 
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      emailFieldCtrl.setValue("foo@foo.com");
-      passwdFieldCtrl.setValue("sixtyNine69)^");
-      emailFieldCtrl.validate();
-      passwdFieldCtrl.validate();
+      emailFieldCtrl.setMockValue("foo@foo.com");
+      passwdFieldCtrl.setMockValue("sixtyNine69)^");
     }
   }, []);
 

@@ -2,7 +2,6 @@ import { ClientErr } from "@/lib/errors";
 import prisma from "@/lib/prisma-client";
 import { UtilLib } from "@/lib/util";
 import { NextApiRequest, NextApiResponse } from "next";
-import { features } from "process";
 import { isString } from "util";
 
 export default async function handler(
