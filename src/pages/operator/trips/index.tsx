@@ -1,18 +1,21 @@
 import { OPERATOR_SESSION_COOKIE_NAME, XTripOps } from "@/constants";
 import prisma from "@/lib/prisma-client";
-import { OperatorServices } from "@/services/operator";
-import { UtilLib } from "@/lib/util";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next/types";
 import React, { type FC, useState, useEffect } from "react";
 import { Trip2 } from "@/lib/types";
-import { Trip, TripStatus } from "@prisma/client";
+import { TripStatus } from "@prisma/client";
 import moment from "moment";
-import { DatetimeLib } from "@/lib/datetime";
-import { getCookie, hasCookie } from "cookies-next";
+import { getCookie } from "cookies-next";
 import { AuthLib } from "@/lib/auth";
 import TripItem2 from "@/components/operator/TripItem2";
+import FilterSelectable from "@/components/common/FilterSelectable";
+import Icon from "@mdi/react";
+import { mdiBusClock, mdiBusMarker, mdiBusWrench, mdiPlus } from "@mdi/js";
+import Navbar2 from "@/components/operator/Navbar2";
+import Aside from "@/components/operator/Aside";
+import cities from "@/cities";
+import FilterDate from "@/components/common/FilterDate";
 
 type TripsFilterParams = {
   status?: string;
@@ -21,9 +24,9 @@ type TripsFilterParams = {
   al?: string;
 };
 
-const TripsPage = ({
-  trips,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
+
+const TripsPage: FC<Props> = ({ trips }) => {
   const [tripList, setTripList] = useState<Trip2[]>(trips);
   const [filterParams, setFilterParams] = useState<TripsFilterParams>({});
 
@@ -34,7 +37,7 @@ const TripsPage = ({
       filterParams.dl !== undefined ||
       filterParams.al !== undefined
     ) {
-      reHydrateTripList();
+      // filter logic here
     }
   }, [
     filterParams.status,
@@ -42,29 +45,6 @@ const TripsPage = ({
     filterParams.dl,
     filterParams.al,
   ]);
-
-  const reHydrateTripList = async () => {
-    if (!hasCookie("operatorId"))
-      throw new Error("Missing 'operatorId' cookie for data retrieval.");
-    const res = await OperatorServices.TripManager.getMany(
-      getCookie("operatorId")!
-    );
-    UtilLib.handleFetchResponse<Trip2[]>(res, {
-      successCallBack(data) {
-        const filtered = data.filter((trip) => {
-          const dt = moment(trip.departureTime);
-          return (
-            (!filterParams.status || trip.status === filterParams.status) &&
-            (!filterParams.date || dt.isSame(filterParams.date, "day")) &&
-            (!filterParams.dl || trip.departureLocation === filterParams.dl) &&
-            (!filterParams.al || trip.arrivalLocation === filterParams.al)
-          );
-        });
-        setTripList(filtered);
-      },
-      errCallback: console.error,
-    });
-  };
 
   const handleFilterChange = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
@@ -77,47 +57,78 @@ const TripsPage = ({
   };
 
   return (
-    <div>
-      <Link href={"/operator/trips/entry"}>Add New Trip</Link>{" "}
-      <section>
-        <select name="status" onChange={handleFilterChange}>
-          <option value={""}>None</option>
-          <option value={TripStatus.IDLE}>Idle</option>
-          <option value={TripStatus.LAUNCHED}>Launched</option>
-          <option value={TripStatus.WITHDRAWN}>Withdraw</option>
-        </select>
-        <select name="dl" onChange={handleFilterChange}>
-          <option value={""}>None</option>
-          <option value="Yangon">Yangon</option>
-          <option value="Mandalay">Mandalay</option>
-          <option value="Lashio">Lashio</option>
-        </select>
-        <select name="al" onChange={handleFilterChange}>
-          <option value={""}>None</option>
-          <option value="Yangon">Yangon</option>
-          <option value="Mandalay">Mandalay</option>
-          <option value="Lashio">Lashio</option>
-        </select>
-        <input type="date" name="date" onChange={handleFilterChange} />
-      </section>
-      <hr />
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Departure Location</th>
-            <th>Arrival Location</th>
-            <th>Departs At</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tripList.map((trip, index) => (
-            <TripItem2 key={index} trip={trip} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <Navbar2 />
+      <main className="section">
+        <div className="level">
+          <div className="level-left">
+            <div className="level-item">
+              <Link className="button is-link" href={"/operator/trips/entry"}>
+                <span className="icon">
+                  <Icon path={mdiPlus} size="1.5rem" />
+                </span>
+                <span>Add New Trip</span>
+              </Link>
+            </div>
+          </div>
+          <div className="level-right">
+            <div className="level-item">
+              <FilterSelectable
+                label="Status"
+                icon={<Icon path={mdiBusWrench} />}
+                onChange={handleFilterChange}
+                optionList={[
+                  { value: "", option: "None" },
+                  { value: TripStatus.IDLE, option: "Idle" },
+                  { value: TripStatus.LAUNCHED, option: "Launched" },
+                  { value: TripStatus.WITHDRAWN, option: "Withdrawn" },
+                ]}
+              />
+            </div>
+            <div className="level-item">
+              <FilterSelectable
+                label={"Depart"}
+                icon={<Icon path={mdiBusMarker} />}
+                optionList={cities.map((c) => ({ value: c, option: c }))}
+                onChange={handleFilterChange}
+              />
+            </div>
+            <div className="level-item">
+              <FilterSelectable
+                label={"Arrive"}
+                icon={<Icon path={mdiBusMarker} />}
+                optionList={cities.map((c) => ({ value: c, option: c }))}
+                onChange={handleFilterChange}
+              />
+            </div>
+            <div className="level-item">
+              <FilterDate
+                label="Date"
+                min={moment()}
+                icon={<Icon path={mdiBusClock} />}
+                onChange={handleFilterChange}
+              />
+            </div>
+          </div>
+        </div>
+        <table className="table is-fullwidth is-hoverable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Departure Location</th>
+              <th>Arrival Location</th>
+              <th>Departs At</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tripList.map((trip, index) => (
+              <TripItem2 key={index} trip={trip} />
+            ))}
+          </tbody>
+        </table>
+      </main>
+    </>
   );
 };
 
