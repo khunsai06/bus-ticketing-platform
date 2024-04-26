@@ -2,9 +2,6 @@ import { $Enums } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { AuthLib } from "@/lib/auth";
-import prisma from "./lib/prisma-client";
-import { isPageStatic } from "next/dist/build/utils";
-import { resolve } from "path";
 import {
   ADMIN_SESSION_COOKIE_NAME,
   CONSUMER_SESSION_COOKIE_NAME,
@@ -12,18 +9,17 @@ import {
 } from "./constants";
 
 const excludedEndPoints = [
-  "/operator/login",
   "/consumer/login",
   "/consumer/signup",
-  "/api/consumer/signup",
+  "/portal/operator/login",
   "/admin/login",
+  "/api/consumer/signup",
   "/api/auth",
 ];
-const operatorEndPoints = ["/operator", "/api/operator"];
+const operatorEndPoints = ["/portal/operator", "/api/operator"];
 const consumerEndPoints = ["/consumer", "/api/consumer"];
 const adminEndPoints = ["/admin", "/api/admin"];
 
-// This function can be marked `async` if using `await` inside
 export async function middleware(req: NextRequest) {
   console.log(`${req.method} - ${req.url}`);
   const pathName = req.nextUrl.pathname;
@@ -46,7 +42,7 @@ export async function middleware(req: NextRequest) {
   const isAdminEndPoints = adminEndPoints.some((path) =>
     pathName.startsWith(path)
   );
-  const operatorLoginUrl = new URL("/operator/login", req.url);
+  const operatorLoginUrl = new URL("/portal/operator/login", req.url);
   const consumerLoginUrl = new URL("/consumer/login", req.url);
   const adminLoginUrl = new URL("/admin/login", req.url);
   // console.log({ cookies: req.cookies.toString() });

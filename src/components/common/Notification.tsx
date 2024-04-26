@@ -5,7 +5,7 @@ type Props = PropsWithChildren & {
   className?: string;
 };
 
-const Notification: React.FC<Props> = ({ onDelete, children, className }) => {
+const Notification2: React.FC<Props> = ({ onDelete, children, className }) => {
   className += " notification";
   return (
     <div className={className}>
@@ -15,4 +15,4 @@ const Notification: React.FC<Props> = ({ onDelete, children, className }) => {
   );
 };
 
-export default Notification;
+export default Notification2;

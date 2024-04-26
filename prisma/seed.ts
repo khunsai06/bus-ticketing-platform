@@ -45,7 +45,7 @@ async function main() {
           min: 2,
           max: 5,
         }),
-        additional: faker.lorem.lines({ min: 1, max: 5 }),
+        additional: faker.lorem.lines({ min: 1, max: 4 }),
         seats: {
           createMany: {
             data: faker.helpers.multiple(
@@ -62,7 +62,7 @@ async function main() {
                   min: 2,
                   max: 5,
                 }),
-                additional: faker.lorem.lines({ min: 1, max: 5 }),
+                additional: faker.lorem.lines({ min: 1, max: 4 }),
               }),
               {
                 count: { min: 12, max: 24 },

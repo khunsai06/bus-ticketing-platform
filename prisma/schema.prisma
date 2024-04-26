@@ -22,41 +22,41 @@ model Credential {
   email             String?            @unique
   passwd            String
   userType          UserType
-  operatorPersonnel OperatorPersonnel?
-  consumer          Consumer?
-  admin             Admin?
+  Consumer          Consumer?
+  Admin             Admin?
+  OperatorPersonnel OperatorPersonnel?
 
   @@map("credentials")
 }
 
 model Consumer {
-  id            String         @id @default(cuid())
-  name          String
-  dob           DateTime       @db.Date
-  gender        String
-  phone         String
-  cid           String         @unique
-  credential    Credential     @relation(fields: [cid], references: [id])
-  cancellations Cancellation[]
-  reservations  Reservation[]
+  id       String    @id @default(cuid())
+  name     String
+  dob      DateTime  @db.Date
+  gender   String
+  phone    String
+  Bookings Booking[]
+
+  Credential   Credential @relation(fields: [credentialId], references: [id])
+  credentialId String     @unique
 
   @@map("consumers")
 }
 
 model Admin {
-  id         String     @id @default(cuid())
-  cid        String     @unique
-  credential Credential @relation(fields: [cid], references: [id])
+  id           String     @id @default(cuid())
+  Credential   Credential @relation(fields: [credentialId], references: [id])
+  credentialId String     @unique
 
   @@map("admins")
 }
 
 model OperatorPersonnel {
-  id         String     @id @default(cuid())
-  cid        String     @unique
-  credential Credential @relation(fields: [cid], references: [id])
-  operatorId String
-  operator   Operator   @relation(fields: [operatorId], references: [id])
+  id           String     @id @default(cuid())
+  Credential   Credential @relation(fields: [credentialId], references: [id])
+  credentialId String     @unique
+  Operator     Operator?  @relation(fields: [operatorId], references: [id])
+  operatorId   String?
 
   @@map("operator_personnel")
 }
@@ -68,8 +68,10 @@ model Operator {
   logo              String?
   background        String?
   supportContacts   String[]
-  associates        OperatorPersonnel[]
-  trips             Trip[]
+  Associates        OperatorPersonnel[]
+  Trips             Trip[]
+  Transactions      Transaction[]
+  PayoutRequests    PayoutRequest[]
 
   @@map("operators")
 }
@@ -95,8 +97,8 @@ model Trip {
   status            TripStatus @default(IDLE)
 
   operatorId String
-  operator   Operator @relation(fields: [operatorId], references: [id])
-  seats      Seat[]
+  Operator   Operator @relation(fields: [operatorId], references: [id])
+  Seats      Seat[]
 
   @@map("trips")
 }
@@ -104,45 +106,54 @@ model Trip {
 enum SeatStatus {
   FREE
   LOCKED
-  RESERVED
+  BOOKED
 }
 
 model Seat {
-  id           String        @id @default(cuid())
-  number       String
-  location     String[]
-  features     String[]
-  additional   String?
-  status       SeatStatus    @default(FREE)
-  trip         Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId       String
-  reservation  Reservation?
-  cancellation Cancellation?
+  id         String     @id @default(cuid())
+  number     String
+  location   String[]
+  features   String[]
+  additional String?
+  status     SeatStatus @default(FREE)
+  Trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId     String
+  Booking    Booking?   @relation(fields: [bookingId], references: [id])
+  bookingId  String?
 
   @@map("seats")
 }
 
-model Reservation {
-  id         String   @id @default(cuid())
-  isCanceled Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  consumer   Consumer @relation(fields: [consumerId], references: [id])
-  consumerId String
-  seat       Seat     @relation(fields: [seatId], references: [id])
-  seatId     String   @unique
+model Booking {
+  id          String       @id @default(cuid())
+  isCanceled  Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  Seats       Seat[]
+  Consumer    Consumer     @relation(fields: [consumerId], references: [id])
+  consumerId  String
+  Transaction Transaction?
 
-  @@map("reservations")
+  @@map("bookings")
 }
 
-model Cancellation {
+model Transaction {
   id         String   @id @default(cuid())
-  reason     String
-  isResolved Boolean  @default(false)
+  amount     Decimal  @db.Money
   createdAt  DateTime @default(now())
-  consumer   Consumer @relation(fields: [consumerId], references: [id])
-  consumerId String
-  seat       Seat     @relation(fields: [seatId], references: [id])
-  seatId     String   @unique
+  Operator   Operator @relation(fields: [operatorId], references: [id])
+  operatorId String
+  Booking    Booking  @relation(fields: [bookingId], references: [id])
+  bookingId  String   @unique
 
-  @@map("cancellations")
+  @@map("transactions")
+}
+
+model PayoutRequest {
+  id         String   @id @default(cuid())
+  amount     Decimal  @db.Money
+  createdAt  DateTime @default(now())
+  Operator   Operator @relation(fields: [operatorId], references: [id])
+  operatorId String
+
+  @@map("payout_requests")
 }

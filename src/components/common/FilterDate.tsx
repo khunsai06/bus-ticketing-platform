@@ -1,7 +1,21 @@
 import moment from "moment";
 import React from "react";
-type Props = { value: moment.Moment; label: string; icon?: React.ReactNode };
-const FilterDate: React.FC<Props> = ({ icon, label, value }) => {
+type Props = {
+  label: string;
+  icon: React.ReactNode;
+  min?: moment.Moment;
+  value?: moment.Moment;
+  defaultValue?: moment.Moment;
+  onChange?: React.ChangeEventHandler<Element>;
+};
+const FilterDate: React.FC<Props> = ({
+  icon,
+  label,
+  min,
+  value,
+  defaultValue,
+  onChange,
+}) => {
   return (
     <div className="field has-addons">
       <div className="control">
@@ -14,7 +28,10 @@ const FilterDate: React.FC<Props> = ({ icon, label, value }) => {
         <input
           className="input"
           type="date"
-          value={value.format("YYYY-MM-DD")}
+          min={min?.format("YYYY-MM-DD")}
+          value={value?.format("YYYY-MM-DD")}
+          defaultValue={defaultValue?.format("YYYY-MM-DD")}
+          onChange={onChange}
         />
       </div>
     </div>

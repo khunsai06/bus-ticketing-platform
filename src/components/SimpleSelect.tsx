@@ -5,6 +5,8 @@ type Props = PropsWithChildren & {
   name?: string;
   help?: string;
   value?: string | number | readonly string[];
+  defaultValue?: string | number | readonly string[];
+  required?: boolean;
   onChange?: React.ChangeEventHandler<HTMLSelectElement>;
   onFocus?: React.FocusEventHandler<HTMLSelectElement>;
 };

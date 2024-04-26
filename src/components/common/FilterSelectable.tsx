@@ -1,7 +1,20 @@
 import React from "react";
 
-type Props = { optionList: string[]; label: string; icon?: React.ReactNode };
-const FilterSelectable: React.FC<Props> = ({ optionList, label, icon }) => {
+type Props = {
+  label: string;
+  icon: React.ReactNode;
+  optionList: { value: string | number | readonly string[]; option: string }[];
+  value?: string | number | readonly string[];
+  onChange?: React.FormEventHandler<Element>;
+};
+
+const FilterSelectable: React.FC<Props> = ({
+  optionList,
+  label,
+  icon,
+  value,
+  onChange,
+}) => {
   return (
     <div className="field has-addons">
       <div className="control">
@@ -12,9 +25,9 @@ const FilterSelectable: React.FC<Props> = ({ optionList, label, icon }) => {
       </div>
       <div className="control">
         <div className="select">
-          <select name="">
-            {optionList.map((option, index) => (
-              <option key={index} value={index}>
+          <select value={value} onChange={onChange}>
+            {optionList.map(({ value, option }, index) => (
+              <option key={index} value={value}>
                 {option}
               </option>
             ))}

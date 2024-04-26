@@ -28,7 +28,8 @@ const details: React.FC<Props> = ({ trip }) => {
     });
   };
 
-  const edit = () => rt.push(`/operator/trips/entry?ops=edit&id=${trip2.id}`);
+  const edit = () =>
+    rt.push(`/portal/operator/trips/entry?ops=edit&id=${trip2.id}`);
 
   const remove = async () => {
     const res = await OperatorServices.TripManager.xOperation(
@@ -37,7 +38,7 @@ const details: React.FC<Props> = ({ trip }) => {
     );
     UtilLib.handleFetchResponse(res, {
       successCallBack(_) {
-        rt.replace("/operator/trips");
+        rt.replace("/portal/operator/trips");
       },
       errCallback: console.error,
     });
@@ -105,12 +106,10 @@ const details: React.FC<Props> = ({ trip }) => {
   return (
     <>
       <Navbar2 />
-      <div className="columns">
-        <Aside />
-        <div className="column">
-          <section>
-            <br />
-            <h4 className="title is-4">Details</h4>
+      <section className="section">
+        <div className="columns">
+          <div className="column">
+            <h4 className="title is-4">Trip Details</h4>
             <LabelValueDisplay label="Trip Name" value={name} />
             <LabelValueDisplay label="Route" value={route} />
             <LabelValueDisplay label="Distance" value={distance} />
@@ -124,14 +123,14 @@ const details: React.FC<Props> = ({ trip }) => {
             {status === "IDLE" && idleActions}
             {status === "LAUNCHED" && launchedActions}
             <hr />
-            <h4 className="title is-4">Seats</h4>
+            <h4 className="title is-4">Seats List</h4>
             <SeatEntryDialog
               tripId={trip.id}
               active={dialogSwitch.value}
               closeDialog={dialogSwitch.close}
               refresh={reFetchTrip}
             />
-            <table className="table is-hoverable">
+            <table className="table is-fullwidth is-hoverable">
               <thead>
                 <tr>
                   <th>Seat Number</th>
@@ -153,9 +152,9 @@ const details: React.FC<Props> = ({ trip }) => {
                 ))}
               </tbody>
             </table>
-          </section>
+          </div>
         </div>
-      </div>
+      </section>
     </>
   );
 };

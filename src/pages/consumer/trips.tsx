@@ -1,4 +1,4 @@
-import Cities from "@/cities";
+import cities from "@/cities";
 import FilterDate from "@/components/common/FilterDate";
 import FilterSelectable from "@/components/common/FilterSelectable";
 import Navbar3 from "@/components/consumer/Navbar3";
@@ -27,27 +27,29 @@ const ConsumerTripListPage: React.FC<Props> = ({ trips }) => {
     <>
       <Navbar3 />
       <section className="section">
-        <div className="columns">
-          <div className="column is-narrow">
-            <FilterSelectable
-              optionList={Cities}
-              label="From"
-              icon={<Icon path={mdiMapMarker} size={0.75} />}
-            />
-          </div>
-          <div className="column is-narrow">
-            <FilterSelectable
-              optionList={Cities}
-              label="To"
-              icon={<Icon path={mdiMapMarker} size={0.75} />}
-            />
-          </div>
-          <div className="column is-narrow">
-            <FilterDate
-              value={moment()}
-              label="When"
-              icon={<Icon path={mdiCalendar} size={0.75} />}
-            />
+        <div className="level">
+          <div className="level-right">
+            <div className="level-item">
+              <FilterSelectable
+                optionList={cities.map((c) => ({ value: c, option: c }))}
+                label="From"
+                icon={<Icon path={mdiMapMarker} size="1.125rem" />}
+              />
+            </div>
+            <div className="level-item">
+              <FilterSelectable
+                optionList={cities.map((c) => ({ value: c, option: c }))}
+                label="To"
+                icon={<Icon path={mdiMapMarker} size="1.125rem" />}
+              />
+            </div>
+            <div className="level-item">
+              <FilterDate
+                defaultValue={moment()}
+                label="When"
+                icon={<Icon path={mdiCalendar} size="1.125rem" />}
+              />
+            </div>
           </div>
         </div>
         <ul>

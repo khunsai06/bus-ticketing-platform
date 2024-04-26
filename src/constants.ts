@@ -2,6 +2,12 @@ import { $Enums } from "@prisma/client";
 
 export const iconSize = 0.8;
 
+export enum PaymentType {
+  MPU = "MPU",
+  KBZPAY = "KBZPAY",
+  VISA = "VISA",
+}
+
 export enum XSeatOps {
   FREE = "FREE",
   LOCK = "LOCK",

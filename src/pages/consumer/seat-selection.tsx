@@ -1,25 +1,16 @@
 import LabelValueDisplay from "@/components/common/LabelValueDisplay";
+import Footer from "@/components/consumer/Footer";
 import Navbar3 from "@/components/consumer/Navbar3";
 import SeatItem3 from "@/components/consumer/SeatItem3";
 import { DatetimeLib } from "@/lib/datetime";
 import prisma from "@/lib/prisma-client";
 import { Trip2 } from "@/lib/types";
 import { UtilLib } from "@/lib/util";
-import {
-  mdiBasket,
-  mdiCashFast,
-  mdiCashMinus,
-  mdiChevronRight,
-  mdiCreditCard,
-  mdiCreditCardCheck,
-  mdiCurrencyUsd,
-  mdiCurrencyUsdOff,
-  mdiShopping,
-  mdiShoppingOutline,
-} from "@mdi/js";
+import { mdiArrowRightCircle } from "@mdi/js";
 import Icon from "@mdi/react";
 import { Operator, Seat } from "@prisma/client";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { isString } from "util";
 
@@ -35,13 +26,26 @@ const SeatSelectionPage: React.FC<Props> = ({ seats, trip, operator }) => {
 
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const total = selectedSeats.length * trip.price;
-  const selectSeat = (selectedSeat: Seat) =>
+  const selectItem = (selectedSeat: Seat) =>
     setSelectedSeats((prev) => [...prev, selectedSeat]);
-  const unSelectSeat = (unSelectedSeat: Seat) =>
+  const unSelectItem = (unSelectedSeat: Seat) =>
     setSelectedSeats((prev) =>
       prev.filter((seat) => seat.id !== unSelectedSeat.id)
     );
 
+  const rt = useRouter();
+  const toBookingDetails = () => {
+    const data = {
+      operator,
+      trip,
+      selectedSeats,
+    };
+    const context = Buffer.from(JSON.stringify(data)).toString("base64");
+    rt.push({
+      pathname: "/consumer/booking-details",
+      query: { context },
+    });
+  };
   return (
     <>
       <Navbar3 />
@@ -80,22 +84,41 @@ const SeatSelectionPage: React.FC<Props> = ({ seats, trip, operator }) => {
                       key={index}
                       seat={seat}
                       selected={isSelected}
-                      onSelect={selectSeat}
-                      onUnSelect={unSelectSeat}
+                      onSelect={selectItem}
+                      onUnSelect={unSelectItem}
                     />
                   );
                 })}
               </div>
             </div>
-            <div className="buttons is-justify-content-end">
-              <button className="button is-link is-light">
-                <span className="icon">
-                  <Icon path={mdiChevronRight} size="1.5rem" />
-                </span>
-                <span>Continue to Payment</span>
-              </button>
-            </div>
           </section>
+          {selectedSeats.length > 0 && (
+            <section className="column is-one-third-widescreen">
+              <div className="card">
+                <div className="card-header">
+                  <p className="card-header-title">Selected Seats</p>
+                </div>
+                <div className="card-content has-text-centered">
+                  <div className="field">
+                    <span className="is-size-5 has-text-success-50 has-text-weight-medium">
+                      {UtilLib.toString3(selectedSeats.map((s) => s.number))}
+                    </span>
+                  </div>
+                </div>
+                <div className="card-footer is-clipped">
+                  <button
+                    className="card-footer-item button is-radiusless is-shadowless is-link"
+                    onClick={toBookingDetails}
+                  >
+                    <span className="icon">
+                      <Icon path={mdiArrowRightCircle} size={"1.125rem"} />
+                    </span>
+                    <span>Book Now</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
           <section className="column is-full">
             <div className="fixed-grid has-1-cols-mobile has-4-cols-widescreen">
               <div className="grid">
@@ -142,6 +165,7 @@ const SeatSelectionPage: React.FC<Props> = ({ seats, trip, operator }) => {
           </section>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

@@ -1,13 +1,15 @@
 import Navbar2 from "@/components/operator/Navbar2";
 import useField from "@/hooks/useField";
+import Notification2 from "@/components/common/Notification";
 import { UtilLib } from "@/lib/util";
 import { passwdSchema, unameSchema } from "@/lib/zod-schema";
 import { Auth } from "@/services/auth";
 import { $Enums } from "@prisma/client";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import SimpleInput from "@/components/SimpleInput";
 
-export const Page = () => {
+const Page = () => {
   const unameFieldCtrl = useField({
     initialValue: "",
     zodSchema: unameSchema,
@@ -44,7 +46,7 @@ export const Page = () => {
     UtilLib.handleFetchResponse(res, {
       successCallBack(data) {
         clearResponseErr();
-        rt.push("/operator");
+        rt.push("/portal/operator");
       },
       errCallback: setResponseErr,
     });
@@ -56,45 +58,42 @@ export const Page = () => {
       <section className="section">
         <div className="columns is-centered">
           <div className="column is-half-tablet is-one-quarter-widescreen">
-            {responseErr && (
-              <p>
-                {responseErr}{" "}
-                <button onClick={clearResponseErr}>clear error</button>
-              </p>
-            )}
             <form onSubmit={handleLogin}>
-              <h4 className="title is-4">Sign in to your account.</h4>
+              <h4 className="title is-5">Operator Portal: Secure Login</h4>
+              <hr />
               {responseErr && (
-                <Notification
+                <Notification2
                   className="is-danger is-light"
                   onDelete={clearResponseErr}
                 >
                   {responseErr}
-                </Notification>
+                </Notification2>
               )}
-              <input
+              <SimpleInput
+                label="Username*"
                 type="text"
                 value={unameFieldCtrl.value}
                 onChange={unameFieldCtrl.onChange}
                 onFocus={unameFieldCtrl.onFocus}
+                help={unameFieldCtrl.message}
               />
-              {!unameFieldCtrl.validity && (
-                <span>{unameFieldCtrl.message}</span>
-              )}
-              <br />
-              <input
-                type="text"
+              <SimpleInput
+                label="Password*"
+                type="password"
                 value={passwdFieldCtrl.value}
                 onChange={passwdFieldCtrl.onChange}
                 onFocus={passwdFieldCtrl.onFocus}
+                help={passwdFieldCtrl.message}
               />
-              {!passwdFieldCtrl.validity && (
-                <span>{passwdFieldCtrl.message}</span>
-              )}
-              <br />
-              <button type="submit" disabled={isAnyFieldInvalid}>
-                Login
-              </button>
+              <div className="field buttons">
+                <button
+                  className="button is-link"
+                  type="submit"
+                  disabled={isAnyFieldInvalid}
+                >
+                  Login
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -102,3 +101,5 @@ export const Page = () => {
     </>
   );
 };
+
+export default Page;

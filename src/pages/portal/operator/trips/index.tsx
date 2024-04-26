@@ -13,7 +13,6 @@ import FilterSelectable from "@/components/common/FilterSelectable";
 import Icon from "@mdi/react";
 import { mdiBusClock, mdiBusMarker, mdiBusWrench, mdiPlus } from "@mdi/js";
 import Navbar2 from "@/components/operator/Navbar2";
-import Aside from "@/components/operator/Aside";
 import cities from "@/cities";
 import FilterDate from "@/components/common/FilterDate";
 
@@ -63,7 +62,10 @@ const TripsPage: FC<Props> = ({ trips }) => {
         <div className="level">
           <div className="level-left">
             <div className="level-item">
-              <Link className="button is-link" href={"/operator/trips/entry"}>
+              <Link
+                className="button is-link"
+                href={"/portal/operator/trips/entry"}
+              >
                 <span className="icon">
                   <Icon path={mdiPlus} size="1.5rem" />
                 </span>

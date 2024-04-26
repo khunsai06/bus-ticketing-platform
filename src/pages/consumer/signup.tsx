@@ -1,6 +1,6 @@
 import SimpleInput from "@/components/SimpleInput";
 import SimpleSelect from "@/components/SimpleSelect";
-import Notification from "@/components/common/Notification";
+import Notification2 from "@/components/common/Notification";
 import Navbar3 from "@/components/consumer/Navbar3";
 import useField from "@/hooks/useField";
 import { DatetimeLib } from "@/lib/datetime";
@@ -138,12 +138,12 @@ const ConsumerSignUpPage = () => {
             <form onSubmit={signUpHandler}>
               <h4 className="title is-4">Create your account.</h4>
               {responseErr && (
-                <Notification
+                <Notification2
                   className="is-danger is-light"
                   onDelete={clearResponseErr}
                 >
                   {responseErr}
-                </Notification>
+                </Notification2>
               )}
               <SimpleInput
                 label="Full Name*"

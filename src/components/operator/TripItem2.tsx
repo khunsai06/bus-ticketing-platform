@@ -5,7 +5,7 @@ import { FC } from "react";
 
 const TripItem2: FC<{ trip: Trip2 }> = ({ trip }) => {
   const rt = useRouter();
-  const detailUrl = `/operator/trips/${trip.id}`;
+  const detailUrl = `/portal/operator/trips/${trip.id}`;
   const goToDetails = () => rt.push(detailUrl);
   return (
     <tr onClick={goToDetails} style={{ cursor: "pointer" }}>

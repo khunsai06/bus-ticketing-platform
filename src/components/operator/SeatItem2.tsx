@@ -16,7 +16,7 @@ const SeatItem2: FC<Props> = ({ seat, tripStatus, refetch }) => {
   const features = UtilLib.toString3(seat.features) || "N/A";
   const launched = tripStatus === "LAUNCHED";
   const withdrawn = tripStatus === "WITHDRAWN";
-  const reserved = seat.status === "RESERVED";
+  const reserved = seat.status === "BOOKED";
   const disableAction1 = withdrawn || reserved;
   const disableAction2 = launched || withdrawn;
 

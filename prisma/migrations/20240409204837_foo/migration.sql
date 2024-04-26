@@ -5,7 +5,7 @@ CREATE TYPE "UserType" AS ENUM ('CONSUMER', 'ADMIN', 'OPERATOR');
 CREATE TYPE "TripStatus" AS ENUM ('IDLE', 'LAUNCHED', 'WITHDRAWN');
 
 -- CreateEnum
-CREATE TYPE "SeatStatus" AS ENUM ('FREE', 'LOCKED', 'RESERVED');
+CREATE TYPE "SeatStatus" AS ENUM ('FREE', 'LOCKED', 'BOOKED');
 
 -- CreateTable
 CREATE TABLE "credentials" (
@@ -25,7 +25,7 @@ CREATE TABLE "consumers" (
     "dob" DATE NOT NULL,
     "gender" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
-    "cid" TEXT NOT NULL,
+    "credentialId" TEXT NOT NULL,
 
     CONSTRAINT "consumers_pkey" PRIMARY KEY ("id")
 );
@@ -33,7 +33,7 @@ CREATE TABLE "consumers" (
 -- CreateTable
 CREATE TABLE "admins" (
     "id" TEXT NOT NULL,
-    "cid" TEXT NOT NULL,
+    "credentialId" TEXT NOT NULL,
 
     CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
 );
@@ -41,8 +41,8 @@ CREATE TABLE "admins" (
 -- CreateTable
 CREATE TABLE "operator_personnel" (
     "id" TEXT NOT NULL,
-    "cid" TEXT NOT NULL,
-    "operatorId" TEXT NOT NULL,
+    "credentialId" TEXT NOT NULL,
+    "operatorId" TEXT,
 
     CONSTRAINT "operator_personnel_pkey" PRIMARY KEY ("id")
 );
@@ -87,31 +87,40 @@ CREATE TABLE "seats" (
     "additional" TEXT,
     "status" "SeatStatus" NOT NULL DEFAULT 'FREE',
     "tripId" TEXT NOT NULL,
+    "bookingId" TEXT,
 
     CONSTRAINT "seats_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "reservations" (
+CREATE TABLE "bookings" (
     "id" TEXT NOT NULL,
     "isCanceled" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "consumerId" TEXT NOT NULL,
-    "seatId" TEXT NOT NULL,
 
-    CONSTRAINT "reservations_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "bookings_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "cancellations" (
+CREATE TABLE "transactions" (
     "id" TEXT NOT NULL,
-    "reason" TEXT NOT NULL,
-    "isResolved" BOOLEAN NOT NULL DEFAULT false,
+    "amount" MONEY NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "consumerId" TEXT NOT NULL,
-    "seatId" TEXT NOT NULL,
+    "operatorId" TEXT NOT NULL,
+    "bookingId" TEXT NOT NULL,
 
-    CONSTRAINT "cancellations_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "payout_requests" (
+    "id" TEXT NOT NULL,
+    "amount" MONEY NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "operatorId" TEXT NOT NULL,
+
+    CONSTRAINT "payout_requests_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -121,13 +130,13 @@ CREATE UNIQUE INDEX "credentials_uname_key" ON "credentials"("uname");
 CREATE UNIQUE INDEX "credentials_email_key" ON "credentials"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "consumers_cid_key" ON "consumers"("cid");
+CREATE UNIQUE INDEX "consumers_credentialId_key" ON "consumers"("credentialId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "admins_cid_key" ON "admins"("cid");
+CREATE UNIQUE INDEX "admins_credentialId_key" ON "admins"("credentialId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "operator_personnel_cid_key" ON "operator_personnel"("cid");
+CREATE UNIQUE INDEX "operator_personnel_credentialId_key" ON "operator_personnel"("credentialId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "operators_name_key" ON "operators"("name");
@@ -136,22 +145,19 @@ CREATE UNIQUE INDEX "operators_name_key" ON "operators"("name");
 CREATE UNIQUE INDEX "operators_registrationEmail_key" ON "operators"("registrationEmail");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "reservations_seatId_key" ON "reservations"("seatId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "cancellations_seatId_key" ON "cancellations"("seatId");
+CREATE UNIQUE INDEX "transactions_bookingId_key" ON "transactions"("bookingId");
 
 -- AddForeignKey
-ALTER TABLE "consumers" ADD CONSTRAINT "consumers_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "consumers" ADD CONSTRAINT "consumers_credentialId_fkey" FOREIGN KEY ("credentialId") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "admins" ADD CONSTRAINT "admins_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "admins" ADD CONSTRAINT "admins_credentialId_fkey" FOREIGN KEY ("credentialId") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "operator_personnel" ADD CONSTRAINT "operator_personnel_cid_fkey" FOREIGN KEY ("cid") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "operator_personnel" ADD CONSTRAINT "operator_personnel_credentialId_fkey" FOREIGN KEY ("credentialId") REFERENCES "credentials"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "operator_personnel" ADD CONSTRAINT "operator_personnel_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "operator_personnel" ADD CONSTRAINT "operator_personnel_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trips" ADD CONSTRAINT "trips_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -160,13 +166,16 @@ ALTER TABLE "trips" ADD CONSTRAINT "trips_operatorId_fkey" FOREIGN KEY ("operato
 ALTER TABLE "seats" ADD CONSTRAINT "seats_tripId_fkey" FOREIGN KEY ("tripId") REFERENCES "trips"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "reservations" ADD CONSTRAINT "reservations_consumerId_fkey" FOREIGN KEY ("consumerId") REFERENCES "consumers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "seats" ADD CONSTRAINT "seats_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "bookings"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "reservations" ADD CONSTRAINT "reservations_seatId_fkey" FOREIGN KEY ("seatId") REFERENCES "seats"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "bookings" ADD CONSTRAINT "bookings_consumerId_fkey" FOREIGN KEY ("consumerId") REFERENCES "consumers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "cancellations" ADD CONSTRAINT "cancellations_consumerId_fkey" FOREIGN KEY ("consumerId") REFERENCES "consumers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "cancellations" ADD CONSTRAINT "cancellations_seatId_fkey" FOREIGN KEY ("seatId") REFERENCES "seats"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payout_requests" ADD CONSTRAINT "payout_requests_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

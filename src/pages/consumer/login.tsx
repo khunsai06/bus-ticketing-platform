@@ -1,6 +1,6 @@
 import Navbar3 from "@/components/consumer/Navbar3";
 import useField from "@/hooks/useField";
-import Notification from "@/components/common/Notification";
+import Notification2 from "@/components/common/Notification";
 import { UtilLib } from "@/lib/util";
 import { emailSchema, passwdSchema, unameSchema } from "@/lib/zod-schema";
 import { Auth } from "@/services/auth";
@@ -61,12 +61,12 @@ const ConsumerLoginPage = () => {
             <form onSubmit={handleLogin}>
               <h4 className="title is-4">Sign in to your account.</h4>
               {responseErr && (
-                <Notification
+                <Notification2
                   className="is-danger is-light"
                   onDelete={clearResponseErr}
                 >
                   {responseErr}
-                </Notification>
+                </Notification2>
               )}
               <SimpleInput
                 label="Email*"

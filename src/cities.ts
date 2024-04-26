@@ -1,4 +1,4 @@
-const Cities: string[] = [
+const cities: string[] = [
   "Yangon",
   "Mandalay",
   "Naypyidaw",
@@ -10,4 +10,4 @@ const Cities: string[] = [
   "Magway",
   "Pathein",
 ];
-export default Cities.toSorted();
+export default cities.toSorted();

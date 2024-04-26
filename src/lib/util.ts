@@ -3,6 +3,12 @@ import { ClientErr, ServerErr } from "./errors";
 import { NextApiRequest, NextApiResponse } from "next/types";
 
 export namespace UtilLib {
+  export function encodeContext(data: any) {
+    return Buffer.from(JSON.stringify(data)).toString("base64");
+  }
+  export function decodeContext(context: any) {
+    return JSON.parse(Buffer.from(context, "base64").toString("utf-8"));
+  }
   export function capitalize(str: string) {
     return str.replace(/\b\w/g, function (char) {
       return char.toUpperCase();

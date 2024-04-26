@@ -4,11 +4,12 @@ type Props = {
   label: string;
   name?: string;
   placeholder?: string;
-  cols?: number;
-  rows?: number;
-  onChange: React.ChangeEventHandler<HTMLTextAreaElement>;
-  onFocus: React.FocusEventHandler<HTMLTextAreaElement>;
-  value: string | number | readonly string[];
+  value?: string | number | readonly string[];
+  defaultValue?: string | number | readonly string[];
+  cols: number;
+  rows: number;
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
+  onFocus?: React.FocusEventHandler<HTMLTextAreaElement>;
 };
 
 const SimpleTextArea: React.FC<Props> = ({ label, ...attrs }) => {
