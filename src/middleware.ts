@@ -11,10 +11,13 @@ import {
 const excludedEndPoints = [
   "/consumer/login",
   "/consumer/signup",
-  "/portal/operator/login",
+  "/operator/login",
+  "/operator/register",
+  "/api/operator/register",
   "/admin/login",
   "/api/consumer/signup",
   "/api/auth",
+  "/api/consumer/inquiry",
 ];
 const operatorEndPoints = ["/portal/operator", "/api/operator"];
 const consumerEndPoints = ["/consumer", "/api/consumer"];
@@ -45,10 +48,6 @@ export async function middleware(req: NextRequest) {
   const operatorLoginUrl = new URL("/portal/operator/login", req.url);
   const consumerLoginUrl = new URL("/consumer/login", req.url);
   const adminLoginUrl = new URL("/admin/login", req.url);
-  // console.log({ cookies: req.cookies.toString() });
-  // console.log({ path: req.nextUrl.pathname });
-  // console.log({ isOperatorEndPoints });
-  // console.log({ hasOperatorSession });
 
   if (isOperatorEndPoints && !hasOperatorSession)
     return NextResponse.redirect(operatorLoginUrl);
@@ -79,22 +78,14 @@ export async function middleware(req: NextRequest) {
     return response;
   }
 
-  // if (isOperatorProtectedEndPoints) {
-  //   console.log(hasOperatorSession);
-
-  //   if (!hasOperatorSession) return NextResponse.redirect(operatorLoginUrl);
-
-  //   if (sessionData && sessionData.userType === $Enums.UserType.OPERATOR) {
-  //     response.cookies.set({ name: "cid", value: sessionData.cid });
-  //     response.cookies.set({
-  //       name: "operatorId",
-  //       value: sessionData.operatorId!,
-  //     });
-  //     return response;
-  //   } else {
-  //     return NextResponse.redirect(operatorLoginUrl);
-  //   }
-  // }
+  if (isAdminEndPoints) {
+    const token = req.cookies.get(ADMIN_SESSION_COOKIE_NAME)?.value!;
+    const sessionData = await AuthLib.tokenVerify(token);
+    if (sessionData.userType !== $Enums.UserType.ADMIN)
+      return NextResponse.redirect(adminLoginUrl);
+    response.cookies.set({ name: "acid", value: sessionData.sub! });
+    return response;
+  }
 
   return response;
 }

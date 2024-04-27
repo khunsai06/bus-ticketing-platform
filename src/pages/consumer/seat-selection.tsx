@@ -1,6 +1,6 @@
 import LabelValueDisplay from "@/components/common/LabelValueDisplay";
 import Footer from "@/components/consumer/Footer";
-import Navbar3 from "@/components/consumer/Navbar3";
+import ConsumerNavbar from "@/components/consumer/Navbar";
 import SeatItem3 from "@/components/consumer/SeatItem3";
 import { DatetimeLib } from "@/lib/datetime";
 import prisma from "@/lib/prisma-client";
@@ -42,13 +42,13 @@ const SeatSelectionPage: React.FC<Props> = ({ seats, trip, operator }) => {
     };
     const context = Buffer.from(JSON.stringify(data)).toString("base64");
     rt.push({
-      pathname: "/consumer/booking-details",
+      pathname: "/consumer/booking-preview",
       query: { context },
     });
   };
   return (
     <>
-      <Navbar3 />
+      <ConsumerNavbar />
       <div className="section">
         <div className="columns is-multiline">
           <section className="column is-one-third-widescreen">
@@ -165,7 +165,6 @@ const SeatSelectionPage: React.FC<Props> = ({ seats, trip, operator }) => {
           </section>
         </div>
       </div>
-      <Footer />
     </>
   );
 };
@@ -179,12 +178,12 @@ export const getServerSideProps = (async ({ query }) => {
       throw new Error(
         "Invalid or missing request query parameter(s): [tripId]."
       );
-    const { seats, operator, ...trip } = await prisma.trip.findUniqueOrThrow({
+    const { Seats, Operator, ...trip } = await prisma.trip.findUniqueOrThrow({
       where: { id: tripId },
-      include: { operator: true, seats: { orderBy: { id: "desc" } } },
+      include: { Operator: true, Seats: { orderBy: { id: "desc" } } },
     });
     const trip2 = JSON.parse(JSON.stringify(trip)) as Trip2;
-    return { props: { seats, operator, trip: trip2 } };
+    return { props: { seats: Seats, operator: Operator, trip: trip2 } };
   } catch (error) {
     return { notFound: true };
   }

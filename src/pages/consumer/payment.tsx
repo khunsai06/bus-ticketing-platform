@@ -1,4 +1,4 @@
-import Navbar3 from "@/components/consumer/Navbar3";
+import ConsumerNavbar from "@/components/consumer/Navbar";
 import React, { FC, useState } from "react";
 import { useQRCode } from "next-qrcode";
 import SimpleInput from "@/components/SimpleInput";
@@ -20,6 +20,7 @@ const Payment: FC<Props> = ({ amountDue, seatsIds }) => {
   const [paymentType, setPaymentType] = useState<PaymentType>();
   const isKbzPay = paymentType === PaymentType.KBZPAY;
   const isMpu = paymentType === PaymentType.MPU;
+  const isVisa = paymentType === PaymentType.VISA;
   const confirmPayment = () => {
     if (!hasCookie("ccid")) {
       throw new Error("Missing 'ccid' cookie for data entry.");
@@ -29,22 +30,27 @@ const Payment: FC<Props> = ({ amountDue, seatsIds }) => {
   };
   return (
     <>
-      <Navbar3 />
+      <ConsumerNavbar />
       <section className="section">
-        <div className="field">
-          <span>By continuing, you agree to the </span>
-          <a href="#">terms and conditions</a>.
+        <div className="columns is-centered">
+          <div className="column is-half-widescreen">
+            <div className="field">
+              <span>By continuing, you agree to the </span>
+              <a href="#">terms and conditions</a>.
+            </div>
+            <ChoosePaymentType setPaymentType={setPaymentType} />
+            <hr />
+            <div className="field">
+              <p className="">Amount Due</p>
+              <span className="is-size-4 has-text-success-50 has-text-weight-medium">
+                {amountDue.toString().concat(" MMK")}
+              </span>
+            </div>
+            {isKbzPay && <KbzPaymentView />}
+            {isMpu && <MpuPaymentView confirmPayment={confirmPayment} />}
+            {isVisa && <MpuPaymentView confirmPayment={confirmPayment} />}
+          </div>
         </div>
-        <ChoosePaymentType setPaymentType={setPaymentType} />
-        <hr />
-        <div className="field">
-          <p className="">Amount Due</p>
-          <span className="is-size-4 has-text-success-50 has-text-weight-medium">
-            {amountDue.toString().concat(" MMK")}
-          </span>
-        </div>
-        {isKbzPay && <KbzPaymentView />}
-        {isMpu && <MpuPaymentView confirmPayment={confirmPayment} />}
       </section>
     </>
   );
@@ -63,11 +69,11 @@ export const getServerSideProps = (async ({ query }) => {
   const result = await prisma.seat.findMany({
     where: { id: { in: context } },
     orderBy: { id: "desc" },
-    select: { id: true, trip: { select: { price: true } } },
+    select: { id: true, Trip: { select: { price: true } } },
   });
 
   const seatsIds = result.map((s) => s.id);
-  const amountDue = result[0].trip.price.times(result.length).toNumber();
+  const amountDue = result[0].Trip.price.times(result.length).toNumber();
 
   return {
     props: {
@@ -168,7 +174,7 @@ const MpuPaymentView: FC<{ confirmPayment: VoidFunction }> = ({
             placeholder="CVV/CVC"
           />
         </div>
-        <div className="field">
+        {/* <div className="field">
           <label className="label">Enter OTP</label>
           <div className="field has-addons">
             <div className="control">
@@ -178,7 +184,7 @@ const MpuPaymentView: FC<{ confirmPayment: VoidFunction }> = ({
               <button className="button is-link is-flex-grow-0">Get OTP</button>
             </div>
           </div>
-        </div>
+        </div> */}
         <hr />
         <div className="buttons">
           <div className="button">Cancel</div>

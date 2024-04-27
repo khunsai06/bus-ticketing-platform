@@ -17,14 +17,13 @@ enum UserType {
 }
 
 model Credential {
-  id                String             @id @default(cuid())
-  uname             String?            @unique
-  email             String?            @unique
-  passwd            String
-  userType          UserType
-  Consumer          Consumer?
-  Admin             Admin?
-  OperatorPersonnel OperatorPersonnel?
+  id       String    @id @default(cuid())
+  uname    String?   @unique
+  email    String?   @unique
+  passwd   String
+  userType UserType
+  Consumer Consumer?
+  Operator Operator?
 
   @@map("credentials")
 }
@@ -43,34 +42,24 @@ model Consumer {
   @@map("consumers")
 }
 
-model Admin {
-  id           String     @id @default(cuid())
-  Credential   Credential @relation(fields: [credentialId], references: [id])
-  credentialId String     @unique
-
-  @@map("admins")
-}
-
-model OperatorPersonnel {
-  id           String     @id @default(cuid())
-  Credential   Credential @relation(fields: [credentialId], references: [id])
-  credentialId String     @unique
-  Operator     Operator?  @relation(fields: [operatorId], references: [id])
-  operatorId   String?
-
-  @@map("operator_personnel")
+model Application {
+  id           String   @id @default(cuid())
+  companyName  String
+  companyEmail String
+  files        String[]
+  createdAt    DateTime @default(now())
 }
 
 model Operator {
-  id                String              @id @default(cuid())
-  name              String              @unique
-  registrationEmail String              @unique
+  id                String          @id @default(cuid())
+  name              String          @unique
+  registrationEmail String          @unique
   logo              String?
   background        String?
   supportContacts   String[]
-  Associates        OperatorPersonnel[]
+  Credential        Credential      @relation(fields: [credentialId], references: [id])
+  credentialId      String          @unique
   Trips             Trip[]
-  Transactions      Transaction[]
   PayoutRequests    PayoutRequest[]
 
   @@map("operators")
@@ -125,35 +114,38 @@ model Seat {
 }
 
 model Booking {
-  id          String       @id @default(cuid())
-  isCanceled  Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  Seats       Seat[]
-  Consumer    Consumer     @relation(fields: [consumerId], references: [id])
-  consumerId  String
-  Transaction Transaction?
+  id             String   @id @default(cuid())
+  isCanceled     Boolean  @default(false)
+  totalAmount    Decimal  @db.Money
+  taxRate        Float
+  commissionRate Float
+  Seats          Seat[]
+  bookedAt       DateTime @default(now())
+  cancelAt       DateTime @updatedAt
+  Consumer       Consumer @relation(fields: [consumerId], references: [id])
+  consumerId     String
 
   @@map("bookings")
 }
 
-model Transaction {
-  id         String   @id @default(cuid())
-  amount     Decimal  @db.Money
-  createdAt  DateTime @default(now())
-  Operator   Operator @relation(fields: [operatorId], references: [id])
-  operatorId String
-  Booking    Booking  @relation(fields: [bookingId], references: [id])
-  bookingId  String   @unique
+model Settings {
+  id              String   @id @default(cuid())
+  taxRate         Float
+  commissionRate  Float
+  refundTimeFrame Int
+  createdAt       DateTime @default(now())
 
-  @@map("transactions")
+  @@map("settings")
 }
 
 model PayoutRequest {
-  id         String   @id @default(cuid())
-  amount     Decimal  @db.Money
-  createdAt  DateTime @default(now())
-  Operator   Operator @relation(fields: [operatorId], references: [id])
-  operatorId String
+  id          String   @id @default(cuid())
+  isPaid      Boolean  @default(false)
+  amount      Decimal  @db.Money
+  requestedAt DateTime @default(now())
+  paidAt      DateTime @updatedAt
+  Operator    Operator @relation(fields: [operatorId], references: [id])
+  operatorId  String
 
   @@map("payout_requests")
 }

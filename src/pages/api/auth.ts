@@ -39,13 +39,13 @@ export default async function handler(
         OR: [{ uname: payload.uname }, { email: payload.email }],
         userType: userType as $Enums.UserType,
       },
-      include: { admin: true, consumer: true, operatorPersonnel: true },
+      include: { Consumer: true, Operator: true },
     });
     await AuthLib.passwdCompare(req.body.passwd, credentials.passwd);
     const token = await AuthLib.tokenCreate({
       cid: credentials.id,
       userType: credentials.userType,
-      operatorId: credentials.operatorPersonnel?.operatorId,
+      operatorId: credentials.Operator?.id,
     });
     const cookie = serialize(`${userType.toLowerCase()}-session`, token, {
       httpOnly: true,

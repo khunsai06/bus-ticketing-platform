@@ -4,7 +4,7 @@ export default function Document() {
   return (
     <Html lang="en" data-theme="light">
       <Head />
-      <body className="has-navbar-fixed-top">
+      <body>
         <Main />
         <NextScript />
       </body>

@@ -6,13 +6,10 @@ export type Trip2 = Omit<Trip, "departureTime" | "arrivalTime" | "price"> & {
   price: number;
 };
 
-export type Trip3 = Trip2 & {
-  seats: Seat[];
-};
-
-export type Trip4 = Trip3 & {
-  operator: Operator;
-};
+export type Trip4 = {
+  Operator: Operator;
+  Seats: Seat[];
+} & Trip2;
 
 export interface CredentialPayload {
   uname?: string;

@@ -1,7 +1,7 @@
 import SimpleInput from "@/components/SimpleInput";
 import SimpleSelect from "@/components/SimpleSelect";
 import Notification2 from "@/components/common/Notification";
-import Navbar3 from "@/components/consumer/Navbar3";
+import ConsumerNavbar from "@/components/consumer/Navbar";
 import useField from "@/hooks/useField";
 import { DatetimeLib } from "@/lib/datetime";
 import { UtilLib } from "@/lib/util";
@@ -131,7 +131,7 @@ const ConsumerSignUpPage = () => {
   };
   return (
     <>
-      <Navbar3 />
+      <ConsumerNavbar />
       <main className="section">
         <div className="columns is-centered">
           <div className="column is-half-tablet is-one-quarter-widescreen">

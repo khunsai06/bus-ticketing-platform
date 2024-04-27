@@ -1,4 +1,4 @@
-import Navbar3 from "@/components/consumer/Navbar3";
+import ConsumerNavbar from "@/components/consumer/Navbar";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import React from "react";
 import { isString } from "util";
@@ -9,6 +9,7 @@ import { mdiArrowRightCircle } from "@mdi/js";
 import { DatetimeLib } from "@/lib/datetime";
 import { UtilLib } from "@/lib/util";
 import { useRouter } from "next/router";
+import { userAgent } from "next/server";
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
 const PaymentPage: React.FC<Props> = ({ operator, trip, selectedSeats }) => {
@@ -20,18 +21,29 @@ const PaymentPage: React.FC<Props> = ({ operator, trip, selectedSeats }) => {
   const total = (trip.price * selectedSeats.length).toString().concat(" MMK");
 
   const rt = useRouter();
-  const proceedToPayment = () => {
-    const contextData = selectedSeats.map((s) => s.id);
-    const context = UtilLib.encodeContext(contextData);
-    rt.push({ pathname: "/consumer/payment", query: { context } });
+  const startPayment = async () => {
+    const ctxData = selectedSeats.map((s) => s.id);
+    const context = UtilLib.encodeContext(ctxData);
+    try {
+      const res = await fetch(`/api/consumer/payment?context=${context}`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const webPaymentUrl = (await res.json()).webPaymentUrl;
+        rt.replace(webPaymentUrl);
+        console.log(webPaymentUrl);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <>
-      <Navbar3 />
+      <ConsumerNavbar />
       <div className="section">
         <div className="columns is-centered">
-          <div className="column is-half">
+          <div className="column is-half-widescreen">
             <div className="card">
               <div className="card-header">
                 <div className="card-header-title">Booking Details</div>
@@ -111,7 +123,7 @@ const PaymentPage: React.FC<Props> = ({ operator, trip, selectedSeats }) => {
                   </p>
                 </div>
                 <div className="buttons is-centered">
-                  <button className="button is-link" onClick={proceedToPayment}>
+                  <button className="button is-link" onClick={startPayment}>
                     <span className="icon">
                       <Icon path={mdiArrowRightCircle} size={"1.125rem"} />
                     </span>
@@ -123,7 +135,6 @@ const PaymentPage: React.FC<Props> = ({ operator, trip, selectedSeats }) => {
           </div>
         </div>
       </div>
-      <footer className="footer"></footer>
     </>
   );
 };

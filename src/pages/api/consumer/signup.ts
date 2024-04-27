@@ -18,12 +18,12 @@ export default async function handler(
       throw new ClientErr(400, "Invalid or missing request body.");
     const hashedPasswd = await AuthLib.passwdHash(payload.passwd);
     const result = await prisma.credential.create({
-      include: { consumer: true },
+      include: { Consumer: true },
       data: {
         email: payload.email,
         passwd: hashedPasswd,
         userType: $Enums.UserType.CONSUMER,
-        consumer: {
+        Consumer: {
           create: {
             name: payload.name,
             dob: new Date(payload.dob),

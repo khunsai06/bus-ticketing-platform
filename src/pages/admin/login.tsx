@@ -1,130 +1,111 @@
-import TextField from "@/components/TextField";
-import React, { FC, FormEvent, useState, useEffect } from "react";
-import { mdiLoginVariant, mdiAccountOutline, mdiKeyOutline } from "@mdi/js";
-import Icon from "@mdi/react";
-import { iconSize } from "@/constants";
-import useTextFieldController from "@/hooks/useTextFieldController";
-import { passwdSchema, unameSchema } from "@/lib/zod-schema";
-import { concatenateStrings } from "@/lib/util";
+import PartnerNavbar from "@/components/operator/Navbar";
+import useField from "@/hooks/useField";
+import Notification2 from "@/components/common/Notification";
+import { UtilLib } from "@/lib/util";
+import { passwdSchema, requiredSchema, unameSchema } from "@/lib/zod-schema";
+import { Auth } from "@/services/auth";
+import { $Enums } from "@prisma/client";
 import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
+import SimpleInput from "@/components/SimpleInput";
+import AdminNavbar from "@/components/admin/Navbar";
 
-const Page: FC<any> = () => {
-  const rt = useRouter();
-  const {
-    value: unameFieldValue,
-    attr: unameFieldAttr,
-    mutate: mutateUname,
-  } = useTextFieldController({
+const AdminLogin = () => {
+  const unameFieldCtrl = useField({
     initialValue: "",
-    schema: unameSchema,
+    zodSchema: requiredSchema,
   });
 
-  const {
-    value: passwdFieldValue,
-    attr: passwdFieldAttr,
-    mutate: mutatePasswd,
-  } = useTextFieldController({
+  const passwdFieldCtrl = useField({
     initialValue: "",
-    schema: passwdSchema,
+    zodSchema: requiredSchema,
   });
 
   useEffect(() => {
-    if (process.env.NODE_ENV == "development") {
-      mutateUname("johndoe.admin");
-      mutatePasswd("qwerqwerQ1!");
+    if (process.env.NODE_ENV === "development") {
+      unameFieldCtrl.setMockValue("admin");
+      passwdFieldCtrl.setMockValue("password");
+      passwdFieldCtrl.validate();
     }
   }, []);
 
-  const [error, setError] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAnyFieldInvalid, setIsAnyFieldInvalid] = useState(true);
+  useEffect(() => {
+    setIsAnyFieldInvalid(!unameFieldCtrl.validity || !passwdFieldCtrl.validity);
+  }, [unameFieldCtrl.validity, passwdFieldCtrl.validity]);
 
-  const hideAlert = () => {
-    setError(undefined);
-  };
+  const [responseErr, setResponseErr] = React.useState("");
+  const clearResponseErr = () => setResponseErr("");
+  const rt = useRouter();
 
-  const login = async (e: FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        uname: unameFieldValue,
-        passwd: passwdFieldValue,
-      }),
-    }).finally(() => {
-      setIsLoading(false);
+    if (isAnyFieldInvalid) return;
+    const uname = unameFieldCtrl.value;
+    const passwd = passwdFieldCtrl.value;
+    const res = await Auth.login({ uname, passwd }, $Enums.UserType.ADMIN);
+    UtilLib.handleFetchResponse(res, {
+      successCallBack(data) {
+        clearResponseErr();
+        rt.push("/admin/dash");
+      },
+      errCallback: setResponseErr,
     });
-    const parsed = await res.json();
-    if (res.ok) {
-      rt.push("/admin/dashboard");
-      return;
-    }
-    setError(parsed.message);
   };
 
   return (
-    <div
-      style={{ height: "100vh" }}
-      className="columns is-mobile is-justify-content-center is-align-items-center"
-    >
-      <div className="column p-0 is-4-desktop is-5-tablet is-10-mobile">
-        <div className="box">
-          <h4 className="title is-5">Login as Administrator</h4>
-          <hr />
-          <form method="post" onSubmit={login}>
-            {error && (
-              <div className="notification is-danger is-light">
-                <button className="delete" onClick={hideAlert} />
-                {error}
+    <>
+      <AdminNavbar />
+      <section className="section">
+        <div className="columns is-centered">
+          <div className="column is-half-tablet is-one-quarter-widescreen">
+            <form onSubmit={handleLogin}>
+              <h4 className="title is-5">Admin Access: Secure Login</h4>
+              <hr />
+              {responseErr && (
+                <Notification2
+                  className="is-danger is-light"
+                  onDelete={clearResponseErr}
+                >
+                  {responseErr}
+                </Notification2>
+              )}
+              <SimpleInput
+                label="Username*"
+                type="text"
+                value={unameFieldCtrl.value}
+                onChange={unameFieldCtrl.onChange}
+                onFocus={unameFieldCtrl.onFocus}
+                help={unameFieldCtrl.message}
+              />
+              <SimpleInput
+                label="Password*"
+                type="password"
+                value={passwdFieldCtrl.value}
+                onChange={passwdFieldCtrl.onChange}
+                onFocus={passwdFieldCtrl.onFocus}
+                help={passwdFieldCtrl.message}
+              />
+              <div className="field">
+                <label className="checkbox">
+                  <input type="checkbox" /> Remember me
+                </label>
               </div>
-            )}
-
-            <TextField
-              type="text"
-              label="Username"
-              name={"uname"}
-              value={unameFieldValue}
-              status={unameFieldAttr.status}
-              help={unameFieldAttr.help}
-              leadingIcon={<Icon path={mdiAccountOutline} size={iconSize} />}
-              onChange={({ currentTarget }) => {
-                mutateUname(currentTarget.value.trim());
-              }}
-            />
-
-            <TextField
-              type="text"
-              label="Password"
-              name={"passwd"}
-              value={passwdFieldValue}
-              status={passwdFieldAttr.status}
-              help={passwdFieldAttr.help}
-              leadingIcon={<Icon path={mdiKeyOutline} size={iconSize} />}
-              onChange={({ currentTarget }) => {
-                mutatePasswd(currentTarget.value.trim());
-              }}
-            />
-
-            <hr />
-            <button
-              className={concatenateStrings([
-                "button is-primary",
-                isLoading ? "is-loading" : "",
-              ])}
-              disabled={!(unameFieldAttr.validity && passwdFieldAttr.validity)}
-              style={{ fontFamily: "inherit", width: "100%" }}
-              type="submit"
-            >
-              <span className="icon">
-                <Icon path={mdiLoginVariant} size={iconSize} />
-              </span>
-              <span>Login</span>
-            </button>
-          </form>
+              <div className="field buttons">
+                <button
+                  className="button is-link is-expanded"
+                  type="submit"
+                  disabled={isAnyFieldInvalid}
+                >
+                  Login
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 };
-export default Page;
+
+export default AdminLogin;

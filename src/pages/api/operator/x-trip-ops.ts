@@ -30,7 +30,7 @@ export default async function handler(
       const result = await prisma.trip.update({
         where: { id },
         data: { status: $Enums.TripStatus.LAUNCHED },
-        include: { seats: true },
+        include: { Seats: true },
       });
       return res.status(200).json(result);
     } else if (req.method === HttpVerb.PATCH && ops === XTripOps.WITHDRAW) {

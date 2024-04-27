@@ -1,30 +1,24 @@
+import Link from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 
-const Aside = () => {
+const PartnerAside = () => {
+  const rt = useRouter();
+  console.log(rt.pathname);
+  console.log(rt.query);
+
   return (
     <aside className="menu">
       <p className="menu-label">General</p>
       <ul className="menu-list">
-        <li style={{ background: "inherited" }}>
-          <a>Dashboard</a>
+        <li>
+          <Link href={"/operator/dash"}>Dashboard</Link>
         </li>
         <li>
-          <a>Customers</a>
-        </li>
-      </ul>
-      <p className="menu-label">Administration</p>
-      <ul className="menu-list">
-        <li>
-          <a>Team Settings</a>
+          <Link href={"/operator/trips"}>Trips Management</Link>
         </li>
         <li>
-          <a>Manage Your Team</a>
-        </li>
-        <li>
-          <a>Invitations</a>
-        </li>
-        <li>
-          <a>Authentication</a>
+          <a>Users</a>
         </li>
       </ul>
       <p className="menu-label">Transactions</p>
@@ -43,4 +37,4 @@ const Aside = () => {
   );
 };
 
-export default Aside;
+export default PartnerAside;
