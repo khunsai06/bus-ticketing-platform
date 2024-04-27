@@ -133,6 +133,8 @@ model Settings {
   taxRate         Float
   commissionRate  Float
   refundTimeFrame Int
+  tocFile         String
+  policyFile      String
   createdAt       DateTime @default(now())
 
   @@map("settings")
