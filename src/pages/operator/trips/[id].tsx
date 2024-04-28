@@ -82,7 +82,15 @@ const PartnerTripDetails: React.FC<Props> = ({ trip, seatList }) => {
         closeDialog={dialogSwitch.close}
         refresh={refresh}
       />
-
+      <button
+        onClick={dialogSwitch.open}
+        className="button is-link is-large"
+        style={{ position: "fixed", zIndex: 100, right: 48, bottom: 48 }}
+      >
+        <span className="icon">
+          <Icon path={mdiPlus} size={1} />
+        </span>
+      </button>
       <div className="section p-0" style={{ height: "calc(100vh - 52px)" }}>
         <div className="columns m-0" style={{ height: "100%" }}>
           <div className="column is-one-fifth">
@@ -92,7 +100,7 @@ const PartnerTripDetails: React.FC<Props> = ({ trip, seatList }) => {
             <div className="columns">
               <div className="column">
                 <div className="field">
-                  <button
+                  {/* <button
                     className="button is-link"
                     onClick={dialogSwitch.open}
                   >
@@ -100,7 +108,7 @@ const PartnerTripDetails: React.FC<Props> = ({ trip, seatList }) => {
                       <Icon path={mdiPlus} size={1} />
                     </span>
                     <span>Add New Seat</span>
-                  </button>
+                  </button> */}
                 </div>
                 <div className="table-container card is-radiusless">
                   <table className="table is-fullwidth is-hoverable">
@@ -208,7 +216,6 @@ export const getServerSideProps = (async ({ req, query }) => {
     },
   });
 
-  console.log({ Seats });
   const trip2 = JSON.parse(JSON.stringify(trip)) as typeof trip;
   const seatList = JSON.parse(JSON.stringify(Seats)) as typeof Seats;
   return {

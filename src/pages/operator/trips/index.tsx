@@ -19,6 +19,15 @@ const TripsPage: FC<Props> = ({ trips }) => {
 
   return (
     <>
+      <Link
+        className="button is-link is-large"
+        href={"/operator/trips/entry"}
+        style={{ position: "fixed", zIndex: 100, right: 48, bottom: 48 }}
+      >
+        <span className="icon">
+          <Icon path={mdiPlus} size={1} />
+        </span>
+      </Link>
       <PartnerNavbar />
       <div className="section p-0" style={{ height: "calc(100vh - 52px)" }}>
         <div className="columns m-0" style={{ height: "100%" }}>
@@ -26,14 +35,14 @@ const TripsPage: FC<Props> = ({ trips }) => {
             <PartnerAside />
           </div>
           <main className="column has-background-white-bis">
-            <div className="field">
+            {/* <div className="field">
               <Link className="button is-link" href={"/operator/trips/entry"}>
                 <span className="icon">
                   <Icon path={mdiPlus} size={1} />
                 </span>
                 <span>Add New Trip</span>
               </Link>
-            </div>
+            </div> */}
             <div className="table-container card is-radiusless">
               <table className="table is-fullwidth is-hoverable">
                 <thead>
@@ -42,10 +51,11 @@ const TripsPage: FC<Props> = ({ trips }) => {
                       <input type="checkbox" />
                     </th>
                     <th>Name</th>
-                    <th>Status</th>
-                    <th>Departure Location</th>
-                    <th>Arrival Location</th>
+                    <th>Route</th>
                     <th>Departs At</th>
+                    <th>Arrive At</th>
+                    <th>Status</th>
+                    <th>Price</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -91,12 +101,13 @@ const TripItem2: FC<{ trip: Trip2 }> = ({ trip }) => {
         <input type="checkbox" />
       </td>
       <td>{trip.name}</td>
+      <td>{trip.departureLocation.concat(" - ", trip.arrivalLocation)}</td>
+      <td>{DatetimeLib.formatDateForDisplay(trip.departureTime)}</td>
+      <td>{DatetimeLib.formatDateForDisplay(trip.arrivalTime)}</td>
       <td>
         <span className="tag is-link is-light">{trip.status}</span>
       </td>
-      <td>{trip.departureLocation}</td>
-      <td>{trip.arrivalLocation}</td>
-      <td>{DatetimeLib.formatDateForDisplay(trip.departureTime)}</td>
+      <td>{trip.price.toString().concat(" MMK")}</td>
     </tr>
   );
 };

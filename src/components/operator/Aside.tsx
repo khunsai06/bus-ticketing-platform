@@ -1,3 +1,5 @@
+import { mdiCurrencyUsd } from "@mdi/js";
+import Icon from "@mdi/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
@@ -12,26 +14,50 @@ const PartnerAside = () => {
       <p className="menu-label">General</p>
       <ul className="menu-list">
         <li>
-          <Link href={"/operator/dash"}>Dashboard</Link>
+          <Link
+            className={rt.pathname === "/operator/dash" ? "is-active" : ""}
+            href={"/operator/dash"}
+          >
+            Dashboard
+          </Link>
         </li>
         <li>
-          <Link href={"/operator/trips"}>Trips Management</Link>
+          <Link
+            className={
+              rt.pathname.includes("/operator/trips") ? "is-active" : ""
+            }
+            href={"/operator/trips"}
+          >
+            Route Management
+          </Link>
         </li>
         <li>
-          <a>Users</a>
+          <Link
+            className={rt.pathname === "/operator/log" ? "is-active" : ""}
+            href={"/operator/log"}
+          >
+            Booking Log
+          </Link>
         </li>
-      </ul>
-      <p className="menu-label">Transactions</p>
-      <ul className="menu-list">
-        <li>
-          <a>Payments</a>
-        </li>
-        <li>
-          <a>Transfers</a>
-        </li>
-        <li>
-          <a>Balance</a>
-        </li>
+        <p className="menu-label">Financial</p>
+        <ul className="menu-list">
+          <li>
+            <Link
+              className={rt.pathname === "/operator/money" ? "is-active" : ""}
+              href={"/operator/money"}
+            >
+              <span>Revenue</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={rt.pathname === "/operator/money" ? "is-active" : ""}
+              href={"/operator/money"}
+            >
+              <span>Payouts</span>
+            </Link>
+          </li>
+        </ul>
       </ul>
     </aside>
   );
