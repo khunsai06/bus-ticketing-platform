@@ -17,6 +17,7 @@ const excludedEndPoints = [
   "/admin/login",
   "/api/consumer/signup",
   "/api/auth",
+  "/api/logout",
   "/api/consumer/inquiry",
 ];
 const operatorEndPoints = ["/operator", "/api/operator"];

@@ -99,31 +99,39 @@ enum SeatStatus {
 }
 
 model Seat {
-  id         String     @id @default(cuid())
+  id         String       @id @default(cuid())
   number     String
   location   String[]
   features   String[]
   additional String?
-  status     SeatStatus @default(FREE)
-  Trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  status     SeatStatus   @default(FREE)
+  Trip       Trip         @relation(fields: [tripId], references: [id], onDelete: Cascade)
   tripId     String
-  Booking    Booking?   @relation(fields: [bookingId], references: [id])
-  bookingId  String?
+  BookedSeat BookedSeat[]
 
   @@map("seats")
 }
 
+model BookedSeat {
+  Seat      Seat    @relation(fields: [seatId], references: [id])
+  Booking   Booking @relation(fields: [bookingId], references: [id])
+  seatId    String
+  bookingId String
+
+  @@id([seatId, bookingId])
+}
+
 model Booking {
-  id             String   @id @default(cuid())
-  isCanceled     Boolean  @default(false)
-  totalAmount    Decimal  @db.Money
+  id             String       @id @default(cuid())
+  isCanceled     Boolean      @default(false)
+  totalAmount    Decimal      @db.Money
   taxRate        Float
   commissionRate Float
-  Seats          Seat[]
-  bookedAt       DateTime @default(now())
-  cancelAt       DateTime @updatedAt
-  Consumer       Consumer @relation(fields: [consumerId], references: [id])
+  bookedAt       DateTime     @default(now())
+  cancelAt       DateTime     @updatedAt
+  Consumer       Consumer     @relation(fields: [consumerId], references: [id])
   consumerId     String
+  BookedSeat     BookedSeat[]
 
   @@map("bookings")
 }

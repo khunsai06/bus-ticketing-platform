@@ -87,7 +87,7 @@ const ConsumerLoginPage = () => {
               <div className="field">
                 <div className="control">
                   <label className="checkbox">
-                    <input type="checkbox" checked />
+                    <input type="checkbox" />
                     <span> Remember me</span>
                   </label>
                 </div>

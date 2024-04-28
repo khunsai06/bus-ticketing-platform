@@ -27,30 +27,22 @@ const ConsumerTripListPage: React.FC<Props> = ({ trips }) => {
     <>
       <ConsumerNavbar />
       <section className="section">
-        <div className="level">
-          <div className="level-right">
-            <div className="level-item">
-              <FilterSelectable
-                optionList={cities.map((c) => ({ value: c, option: c }))}
-                label="From"
-                icon={<Icon path={mdiMapMarker} size="1.125rem" />}
-              />
-            </div>
-            <div className="level-item">
-              <FilterSelectable
-                optionList={cities.map((c) => ({ value: c, option: c }))}
-                label="To"
-                icon={<Icon path={mdiMapMarker} size="1.125rem" />}
-              />
-            </div>
-            <div className="level-item">
-              <FilterDate
-                defaultValue={moment()}
-                label="When"
-                icon={<Icon path={mdiCalendar} size="1.125rem" />}
-              />
-            </div>
-          </div>
+        <div className="field is-grouped is-flex-wrap-wrap">
+          <FilterSelectable
+            optionList={cities.map((c) => ({ value: c, option: c }))}
+            label="From"
+            icon={<Icon path={mdiMapMarker} size="1.125rem" />}
+          />
+          <FilterSelectable
+            optionList={cities.map((c) => ({ value: c, option: c }))}
+            label="To"
+            icon={<Icon path={mdiMapMarker} size="1.125rem" />}
+          />
+          <FilterDate
+            defaultValue={moment()}
+            label="When"
+            icon={<Icon path={mdiCalendar} size="1.125rem" />}
+          />
         </div>
         <ul>
           {trips.map((trip, index) => (
@@ -58,6 +50,7 @@ const ConsumerTripListPage: React.FC<Props> = ({ trips }) => {
           ))}
         </ul>
       </section>
+      <footer className="footer"></footer>
     </>
   );
 };

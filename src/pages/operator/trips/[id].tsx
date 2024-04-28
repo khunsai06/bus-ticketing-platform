@@ -120,7 +120,9 @@ const PartnerTripDetails: React.FC<Props> = ({ trip, seatList }) => {
                       {seatList.map((seat, index) => (
                         <SeatItem2
                           key={index}
-                          consumer={seat.Booking?.Consumer}
+                          consumer={
+                            seat.BookedSeat.map((bs) => bs.Booking.Consumer)[0]
+                          }
                           seat={seat}
                           tripStatus={status}
                           refetch={refresh}
@@ -189,15 +191,24 @@ export const getServerSideProps = (async ({ req, query }) => {
   const id = query.id;
   if (!isString(id))
     throw new Error("Invalid or missing request query parameter(s): [id].");
+
   const { Seats, ...trip } = await prisma.trip.findUniqueOrThrow({
     where: { id },
     include: {
       Seats: {
-        include: { Booking: { include: { Consumer: true } } },
+        include: {
+          BookedSeat: {
+            include: { Booking: { include: { Consumer: true } } },
+            distinct: ["bookingId"],
+            orderBy: { Booking: { bookedAt: "desc" } },
+          },
+        },
         orderBy: { id: "desc" },
       },
     },
   });
+
+  console.log({ Seats });
   const trip2 = JSON.parse(JSON.stringify(trip)) as typeof trip;
   const seatList = JSON.parse(JSON.stringify(Seats)) as typeof Seats;
   return {

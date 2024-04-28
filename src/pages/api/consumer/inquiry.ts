@@ -68,7 +68,11 @@ export default async function handler(
           totalAmount,
           taxRate: setting.taxRate,
           commissionRate: setting.commissionRate,
-          Seats: { connect: seatIdList.map((seatId) => ({ id: seatId })) },
+          BookedSeat: {
+            createMany: {
+              data: seatIdList.map((seatId) => ({ seatId })),
+            },
+          },
         },
       });
     });
