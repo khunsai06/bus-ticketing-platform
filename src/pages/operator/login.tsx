@@ -17,13 +17,13 @@ const Page = () => {
 
   const passwdFieldCtrl = useField({
     initialValue: "",
-    zodSchema: passwdSchema,
+    zodSchema: requiredSchema,
   });
 
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      unameFieldCtrl.setMockValue("khunsai16106655");
-      passwdFieldCtrl.setMockValue("6_&%fsyuKuG~");
+      unameFieldCtrl.setMockValue("khunsai16104628");
+      passwdFieldCtrl.setMockValue("Zm46hkqbT8sw");
       passwdFieldCtrl.validate();
     }
   }, []);

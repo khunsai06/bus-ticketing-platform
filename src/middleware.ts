@@ -19,7 +19,7 @@ const excludedEndPoints = [
   "/api/auth",
   "/api/consumer/inquiry",
 ];
-const operatorEndPoints = ["/portal/operator", "/api/operator"];
+const operatorEndPoints = ["/operator", "/api/operator"];
 const consumerEndPoints = ["/consumer", "/api/consumer"];
 const adminEndPoints = ["/admin", "/api/admin"];
 
@@ -45,7 +45,7 @@ export async function middleware(req: NextRequest) {
   const isAdminEndPoints = adminEndPoints.some((path) =>
     pathName.startsWith(path)
   );
-  const operatorLoginUrl = new URL("/portal/operator/login", req.url);
+  const operatorLoginUrl = new URL("/operator/login", req.url);
   const consumerLoginUrl = new URL("/consumer/login", req.url);
   const adminLoginUrl = new URL("/admin/login", req.url);
 
@@ -75,6 +75,10 @@ export async function middleware(req: NextRequest) {
     if (sessionData.userType !== $Enums.UserType.CONSUMER)
       return NextResponse.redirect(consumerLoginUrl);
     response.cookies.set({ name: "ccid", value: sessionData.sub! });
+    response.cookies.set({
+      name: "consumerId",
+      value: sessionData.consumerId!,
+    });
     return response;
   }
 

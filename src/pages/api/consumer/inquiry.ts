@@ -1,4 +1,5 @@
 import { HttpVerb } from "@/constants";
+import prisma from "@/lib/prisma-client";
 import { UtilLib } from "@/lib/util";
 import { SignJWT, jwtVerify } from "jose";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -30,15 +31,54 @@ export default async function handler(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ payload: inquiryRequestToken }),
     });
+
     const inquiryResponseToken = (await inquiryResponse.json()).payload;
     const { payload } = await jwtVerify(
       inquiryResponseToken,
       new TextEncoder().encode(process.env.JT02)
     );
-    const userDefined1 = payload.userDefined1;
-    const ctx = UtilLib.decodeContext(userDefined1);
-    // const redirectUrl = `/consumer/invoice?context=${ctx}`;
-    res.status(200).json({ msg: "Hello World" });
+
+    if (payload.respCode !== "0000") {
+      const redirectUrl = `http://localhost:3000/consumer`;
+      res.writeHead(302, {
+        location: redirectUrl,
+      });
+      return res.end();
+    }
+
+    const ctxQuery = req.query.context;
+    if (!isString(ctxQuery))
+      throw new Error("Invalid or missing query: [ctxQuery].");
+
+    const ctx = UtilLib.decodeContext(ctxQuery);
+    const consumerId = ctx.consumerId as string;
+    const seatIdList = ctx.seatIdList as string[];
+    const totalAmount = ctx.totalAmount as string;
+    const setting = await prisma.settings.findFirstOrThrow({
+      orderBy: { createdAt: "desc" },
+    });
+    await prisma.$transaction(async (tx) => {
+      await prisma.seat.updateMany({
+        where: { id: { in: seatIdList } },
+        data: { status: "BOOKED" },
+      });
+      await prisma.booking.create({
+        data: {
+          consumerId,
+          totalAmount,
+          taxRate: setting.taxRate,
+          commissionRate: setting.commissionRate,
+          Seats: { connect: seatIdList.map((seatId) => ({ id: seatId })) },
+        },
+      });
+    });
+
+    // const redirectUrl = `http://localhost:3000/consumer/booking-details?bookingId=${booking.id}`;
+    const redirectUrl = `http://localhost:3000/consumer/history`;
+    res.writeHead(302, {
+      location: redirectUrl,
+    });
+    res.end();
   } catch (error) {
     console.log(error);
     res.status(500).end();

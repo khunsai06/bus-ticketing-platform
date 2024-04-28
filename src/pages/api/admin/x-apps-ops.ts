@@ -29,7 +29,6 @@ export default async function handler(
         length: 12,
         numbers: true,
         excludeSimilarCharacters: true,
-        symbols: true,
         strict: true,
       });
       sendMail(app.companyEmail, uname, passwd);

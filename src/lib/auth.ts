@@ -7,6 +7,7 @@ type JWTPayload2 = {
   cid: string;
   userType: $Enums.UserType;
   operatorId?: string;
+  consumerId?: string;
 } & JWTPayload;
 
 export namespace AuthLib {

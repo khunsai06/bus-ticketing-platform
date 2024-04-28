@@ -26,4 +26,19 @@ export namespace DatetimeLib {
   export function latestDate16YearsAgo() {
     return moment().subtract(16, "years").format("YYYY-MM-DD");
   }
+  export function calculateCancellationTime(
+    bookedAt: string,
+    refundTimeFrame: number
+  ) {
+    const bookedTime = moment(bookedAt);
+    const currentTime = moment();
+    const timeDifferenceInMinutes = currentTime.diff(bookedTime, "minutes");
+    const timeLeftForCancellation = refundTimeFrame - timeDifferenceInMinutes;
+    const hoursLeft = Math.floor(timeLeftForCancellation / 60);
+    const minutesLeft = timeLeftForCancellation % 60;
+    return {
+      hours: hoursLeft,
+      minutes: minutesLeft,
+    };
+  }
 }

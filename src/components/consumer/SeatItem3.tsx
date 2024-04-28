@@ -42,7 +42,7 @@ const SeatItem3: React.FC<Props> = ({
               <Icon path={mdiLockOutline} size="1.5rem" />
             </span>
           )}
-          {status === "RESERVED" && (
+          {status === "BOOKED" && (
             <span className="icon">
               <Icon path={mdiAccountGroup} size="1.5rem" />
             </span>

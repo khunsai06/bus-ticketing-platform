@@ -10,15 +10,21 @@ import { DatetimeLib } from "@/lib/datetime";
 import { UtilLib } from "@/lib/util";
 import { useRouter } from "next/router";
 import { userAgent } from "next/server";
+import prisma from "@/lib/prisma-client";
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
-const PaymentPage: React.FC<Props> = ({ operator, trip, selectedSeats }) => {
-  const depTime = DatetimeLib.formatDateForDisplay(trip.departureTime);
-  const arrTime = DatetimeLib.formatDateForDisplay(trip.arrivalTime);
+const PaymentPage: React.FC<Props> = ({ booking }) => {
+  const trip = booking.Seats[0].Trip;
+  const depTime = DatetimeLib.formatDateForDisplay(
+    trip.departureTime.toString()
+  );
+  const arrTime = DatetimeLib.formatDateForDisplay(trip.arrivalTime.toString());
   const stops = UtilLib.toString3(trip.intermediateStops) || "N/A";
   const amenities = UtilLib.toString3(trip.amenities) || "N/A";
   const price = trip.price.toString().concat(" MMK");
-  const total = (trip.price * selectedSeats.length).toString().concat(" MMK");
+  const total = (trip.price.toNumber() * selectedSeats.length)
+    .toString()
+    .concat(" MMK");
 
   const rt = useRouter();
   const startPayment = async () => {
@@ -142,20 +148,15 @@ const PaymentPage: React.FC<Props> = ({ operator, trip, selectedSeats }) => {
 export default PaymentPage;
 
 export const getServerSideProps = (async ({ query }) => {
-  const contextQuery = query.context;
-  if (!isString(contextQuery))
-    throw new Error("Invalid or missing request query parameter(s): [data].");
-  const decoded = Buffer.from(contextQuery, "base64").toString("utf-8");
-  const parsed = JSON.parse(decoded);
-
-  const operator = parsed.operator as Operator;
-  const trip = parsed.trip as Trip2;
-  const selectedSeats = parsed.selectedSeats as Seat[];
+  const bookingId = query.bookingId;
+  if (!isString(bookingId)) return { notFound: true };
+  const result = await prisma.booking.findFirstOrThrow({
+    where: { id: bookingId },
+    orderBy: { bookedAt: "desc" },
+    include: { Seats: { include: { Trip: true } } },
+  });
+  const booking = JSON.parse(JSON.stringify(result)) as typeof result;
   return {
-    props: { operator: operator, trip, selectedSeats },
+    props: { booking },
   };
-}) satisfies GetServerSideProps<{
-  operator: Operator;
-  trip: Trip2;
-  selectedSeats: Seat[];
-}>;
+}) satisfies GetServerSideProps<{}>;

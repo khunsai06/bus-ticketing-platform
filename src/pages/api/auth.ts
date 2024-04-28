@@ -46,6 +46,7 @@ export default async function handler(
       cid: credentials.id,
       userType: credentials.userType,
       operatorId: credentials.Operator?.id,
+      consumerId: credentials.Consumer?.id,
     });
     const cookie = serialize(`${userType.toLowerCase()}-session`, token, {
       httpOnly: true,

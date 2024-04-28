@@ -12,18 +12,15 @@ import React, { useState } from "react";
 import LabelValueDisplay from "@/components/common/LabelValueDisplay";
 import PartnerNavbar from "@/components/operator/Navbar";
 import { Trip2 } from "@/lib/types";
-import { $Enums, Seat } from "@prisma/client";
+import { $Enums, Consumer, Seat } from "@prisma/client";
 import PartnerAside from "@/components/operator/Aside";
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
 const PartnerTripDetails: React.FC<Props> = ({ trip, seatList }) => {
-  console.log({ trip, seatList });
-
   const rt = useRouter();
   const refresh = () => rt.reload();
 
-  const edit = () =>
-    rt.push(`/portal/operator/trips/entry?ops=edit&id=${trip.id}`);
+  const edit = () => rt.push(`/operator/trips/entry?ops=edit&id=${trip.id}`);
 
   const remove = async () => {
     const res = await OperatorServices.TripManager.xOperation(
@@ -32,7 +29,7 @@ const PartnerTripDetails: React.FC<Props> = ({ trip, seatList }) => {
     );
     UtilLib.handleFetchResponse(res, {
       successCallBack(_) {
-        rt.replace("/portal/operator/trips");
+        rt.replace("/operator/trips");
       },
       errCallback: console.error,
     });
@@ -65,8 +62,12 @@ const PartnerTripDetails: React.FC<Props> = ({ trip, seatList }) => {
   const route = trip.departureLocation.concat(" - ", trip.arrivalLocation);
   const distance = trip.distance?.toString().concat(" km") || "N/A";
   const stops = UtilLib.toString3(trip.intermediateStops) || "N/A";
-  const departAt = DatetimeLib.formatDateForDisplay(trip.departureTime);
-  const arriveAt = DatetimeLib.formatDateForDisplay(trip.arrivalTime);
+  const departAt = DatetimeLib.formatDateForDisplay(
+    trip.departureTime.toString()
+  );
+  const arriveAt = DatetimeLib.formatDateForDisplay(
+    trip.arrivalTime.toString()
+  );
   const price = trip.price.toString().concat(" MMK");
   const status = trip.status;
   const amenities = UtilLib.toString3(trip.amenities) || "N/A";
@@ -119,6 +120,7 @@ const PartnerTripDetails: React.FC<Props> = ({ trip, seatList }) => {
                       {seatList.map((seat, index) => (
                         <SeatItem2
                           key={index}
+                          consumer={seat.Booking?.Consumer}
                           seat={seat}
                           tripStatus={status}
                           refetch={refresh}
@@ -189,26 +191,39 @@ export const getServerSideProps = (async ({ req, query }) => {
     throw new Error("Invalid or missing request query parameter(s): [id].");
   const { Seats, ...trip } = await prisma.trip.findUniqueOrThrow({
     where: { id },
-    include: { Seats: { orderBy: { id: "desc" } } },
+    include: {
+      Seats: {
+        include: { Booking: { include: { Consumer: true } } },
+        orderBy: { id: "desc" },
+      },
+    },
   });
-  const trip2 = JSON.parse(JSON.stringify(trip)) as Trip2;
+  const trip2 = JSON.parse(JSON.stringify(trip)) as typeof trip;
+  const seatList = JSON.parse(JSON.stringify(Seats)) as typeof Seats;
   return {
-    props: { trip: trip2, seatList: Seats },
+    props: { trip: trip2, seatList },
   };
-}) satisfies GetServerSideProps<{ trip: Trip2; seatList: Seat[] }>;
+}) satisfies GetServerSideProps<{}>;
 
 import { XSeatOps } from "@/constants";
 import { FC } from "react";
 import Icon from "@mdi/react";
-import { mdiPlus } from "@mdi/js";
+import { mdiOpenInNew, mdiPlus } from "@mdi/js";
+import Link from "next/link";
 
 type SeatItemProps = {
   seat: Seat;
+  consumer?: Consumer;
   tripStatus: $Enums.TripStatus;
   refetch: VoidFunction;
 };
 
-const SeatItem2: FC<SeatItemProps> = ({ seat, tripStatus, refetch }) => {
+const SeatItem2: FC<SeatItemProps> = ({
+  seat,
+  consumer,
+  tripStatus,
+  refetch,
+}) => {
   const location = UtilLib.toString3(seat.location);
   const features = UtilLib.toString3(seat.features);
   const launched = tripStatus === "LAUNCHED";
@@ -290,7 +305,20 @@ const SeatItem2: FC<SeatItemProps> = ({ seat, tripStatus, refetch }) => {
           <p>{location}</p>
           <p>{features}</p>
         </td>
-        <td></td>
+        <td>
+          {consumer && (
+            <Link
+              target="_blank"
+              className="button is-small"
+              href={`/consumer/foo`}
+            >
+              <span>{consumer?.name} </span>
+              <span className="icon">
+                <Icon path={mdiOpenInNew} size="1rem" />
+              </span>
+            </Link>
+          )}
+        </td>
         <td>{actions}</td>
       </tr>
     </>

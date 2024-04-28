@@ -16,9 +16,12 @@ const ConsumerNavbar = () => {
     <nav className="navbar has-shadow">
       <div className="container">
         <div className="navbar-brand">
-          <a className="navbar-item is-size-4 has-text-weight-bold">
+          <Link
+            href={"/consumer"}
+            className="navbar-item is-size-4 has-text-weight-bold"
+          >
             <span className={indieFlower.className}>Tickety Boo</span>
-          </a>
+          </Link>
           <a
             role="button"
             className="navbar-burger"
