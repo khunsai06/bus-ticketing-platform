@@ -39,25 +39,14 @@ const PartnerAside = () => {
             Booking Log
           </Link>
         </li>
-        <p className="menu-label">Financial</p>
-        <ul className="menu-list">
-          <li>
-            <Link
-              className={rt.pathname === "/operator/money" ? "is-active" : ""}
-              href={"/operator/money"}
-            >
-              <span>Revenue</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              className={rt.pathname === "/operator/money" ? "is-active" : ""}
-              href={"/operator/money"}
-            >
-              <span>Payouts</span>
-            </Link>
-          </li>
-        </ul>
+        <li>
+          <Link
+            className={rt.pathname === "/operator/money" ? "is-active" : ""}
+            href={"/operator/money"}
+          >
+            <span>Financial</span>
+          </Link>
+        </li>
       </ul>
     </aside>
   );

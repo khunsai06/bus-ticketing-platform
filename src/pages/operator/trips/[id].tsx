@@ -325,16 +325,12 @@ const SeatItem2: FC<SeatItemProps> = ({
         </td>
         <td>
           {consumer && (
-            <Link
-              target="_blank"
-              className="button is-small"
-              href={`/consumer/foo`}
-            >
+            <button className="button is-small">
               <span>{consumer?.name} </span>
               <span className="icon">
                 <Icon path={mdiOpenInNew} size="1rem" />
               </span>
-            </Link>
+            </button>
           )}
         </td>
         <td>{actions}</td>

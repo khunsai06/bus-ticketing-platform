@@ -51,16 +51,16 @@ model Application {
 }
 
 model Operator {
-  id                String          @id @default(cuid())
-  name              String          @unique
-  registrationEmail String          @unique
+  id                String     @id @default(cuid())
+  name              String     @unique
+  registrationEmail String     @unique
   logo              String?
   background        String?
   supportContacts   String[]
-  Credential        Credential      @relation(fields: [credentialId], references: [id])
-  credentialId      String          @unique
+  Credential        Credential @relation(fields: [credentialId], references: [id])
+  credentialId      String     @unique
   Trips             Trip[]
-  PayoutRequests    PayoutRequest[]
+  // PayoutRequests    PayoutRequest[]
 
   @@map("operators")
 }
@@ -148,14 +148,14 @@ model Settings {
   @@map("settings")
 }
 
-model PayoutRequest {
-  id          String   @id @default(cuid())
-  isPaid      Boolean  @default(false)
-  amount      Decimal  @db.Money
-  requestedAt DateTime @default(now())
-  paidAt      DateTime @updatedAt
-  Operator    Operator @relation(fields: [operatorId], references: [id])
-  operatorId  String
+// model PayoutRequest {
+//   id          String   @id @default(cuid())
+//   isPaid      Boolean  @default(false)
+//   amount      Decimal  @db.Money
+//   requestedAt DateTime @default(now())
+//   paidAt      DateTime @updatedAt
+//   Operator    Operator @relation(fields: [operatorId], references: [id])
+//   operatorId  String
 
-  @@map("payout_requests")
-}
+//   @@map("payout_requests")
+// }

@@ -91,6 +91,8 @@ export const getServerSideProps = (async ({ req }) => {
       BookedSeat: { include: { Seat: { include: { Trip: true } } } },
     },
   });
+  console.log(result);
+
   const bookingList = JSON.parse(JSON.stringify(result)) as typeof result;
   return {
     props: { bookingList },
