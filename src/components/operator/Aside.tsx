@@ -6,8 +6,6 @@ import React from "react";
 
 const PartnerAside = () => {
   const rt = useRouter();
-  console.log(rt.pathname);
-  console.log(rt.query);
 
   return (
     <aside className="menu">

@@ -31,7 +31,7 @@ const TripsPage: FC<Props> = ({ trips }) => {
       <PartnerNavbar />
       <div className="section p-0" style={{ height: "calc(100vh - 52px)" }}>
         <div className="columns m-0" style={{ height: "100%" }}>
-          <div className="column is-one-fifth">
+          <div className="column is-2">
             <PartnerAside />
           </div>
           <main className="column has-background-white-bis">
@@ -43,8 +43,8 @@ const TripsPage: FC<Props> = ({ trips }) => {
                 <span>Add New Trip</span>
               </Link>
             </div> */}
-            <div className="table-container card is-radiusless">
-              <table className="table is-fullwidth is-hoverable">
+            <div className="table-container box is-radiusless">
+              <table className="table is-fullwidth">
                 <thead>
                   <tr>
                     <th>
@@ -80,7 +80,7 @@ export const getServerSideProps = (async ({ req }) => {
     const sessionData = AuthLib.getSessionData(sessionCookie);
     const result = await prisma.trip.findMany({
       where: { operatorId: sessionData.operatorId },
-      orderBy: { id: "desc" },
+      orderBy: { departureTime: "desc" },
     });
     return { props: { trips: JSON.parse(JSON.stringify(result)) } };
   } catch (error) {
@@ -90,6 +90,7 @@ export const getServerSideProps = (async ({ req }) => {
 
 import { DatetimeLib } from "@/lib/datetime";
 import { useRouter } from "next/router";
+import Pagination from "@/components/Pagination";
 
 const TripItem2: FC<{ trip: Trip2 }> = ({ trip }) => {
   const rt = useRouter();
@@ -100,7 +101,7 @@ const TripItem2: FC<{ trip: Trip2 }> = ({ trip }) => {
       <td>
         <input type="checkbox" />
       </td>
-      <td>{trip.name}</td>
+      <td className="is-capitalized">{trip.name}</td>
       <td>{trip.departureLocation.concat(" - ", trip.arrivalLocation)}</td>
       <td>{DatetimeLib.formatDateForDisplay(trip.departureTime)}</td>
       <td>{DatetimeLib.formatDateForDisplay(trip.arrivalTime)}</td>

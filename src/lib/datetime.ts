@@ -12,7 +12,7 @@ export namespace DatetimeLib {
   }
 
   export function formatDateForDisplay(isoString: string): string {
-    return moment(isoString).format("MMM DD, hh:mm A");
+    return moment(isoString).format("MMM DD, YYYY hh:mm A");
   }
 
   export function extractTimeForDisplay(isoString: string): string {

@@ -21,13 +21,13 @@ const AdminLogin = () => {
     zodSchema: requiredSchema,
   });
 
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      unameFieldCtrl.setMockValue("admin");
-      passwdFieldCtrl.setMockValue("password");
-      passwdFieldCtrl.validate();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (process.env.NODE_ENV === "development") {
+  //     unameFieldCtrl.setMockValue("admin");
+  //     passwdFieldCtrl.setMockValue("password");
+  //     passwdFieldCtrl.validate();
+  //   }
+  // }, []);
 
   const [isAnyFieldInvalid, setIsAnyFieldInvalid] = useState(true);
   useEffect(() => {

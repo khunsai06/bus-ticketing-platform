@@ -8,6 +8,7 @@ import { mdiAccessPoint, mdiChevronDown, mdiOpenInNew } from "@mdi/js";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { string } from "zod";
+import { DatetimeLib } from "@/lib/datetime";
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
 const Applications: FC<Props> = ({ apps }) => {
@@ -31,7 +32,7 @@ const Applications: FC<Props> = ({ apps }) => {
       <AdminNavbar />
       <div className="section p-0" style={{ height: "calc(100vh - 52px)" }}>
         <div className="columns m-0" style={{ height: "100%" }}>
-          <div className="column is-one-fifth">
+          <div className="column is-2">
             <AdminAside />
           </div>
           <div className="column has-background-white-bis">
@@ -44,6 +45,7 @@ const Applications: FC<Props> = ({ apps }) => {
                   <th>Company Name</th>
                   <th>Company Email</th>
                   <th>Docs</th>
+                  <th>Created At</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -56,6 +58,7 @@ const Applications: FC<Props> = ({ apps }) => {
                       </td>
                       <td>{app.companyName}</td>
                       <td>{app.companyEmail}</td>
+                      <td>{DatetimeLib.formatDateForDisplay(app.createdAt)}</td>
                       <td>
                         <div className="buttons are-small is-flex-direction-column is-align-items-start">
                           {app.files.map((f, i) => {

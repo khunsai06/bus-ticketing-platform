@@ -57,8 +57,8 @@ const ConsumerSignUpPage = () => {
       genderFieldCtrl.setMockValue("male");
       emailFieldCtrl.setMockValue("foo@foo.com");
       phoneFieldCtrl.setMockValue("+95912341234");
-      passwdFieldCtrl.setMockValue("sixtyNine69)^");
-      confirmFieldCtrl.setMockValue("sixtyNine69)^");
+      passwdFieldCtrl.setMockValue("");
+      confirmFieldCtrl.setMockValue("");
     }
   }, []);
 

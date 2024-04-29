@@ -4,6 +4,7 @@ import { DatetimeLib } from "@/lib/datetime";
 import prisma from "@/lib/prisma-client";
 import { UtilLib } from "@/lib/util";
 import { getCookie } from "cookies-next";
+import moment from "moment";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import React from "react";
 import { isString } from "util";
@@ -17,7 +18,7 @@ export const Log: React.FC<Props> = ({ bookingList }) => {
       <PartnerNavbar />
       <div className="section p-0" style={{ height: "calc(100vh - 52px)" }}>
         <div className="columns m-0" style={{ height: "100%" }}>
-          <div className="column is-one-fifth">
+          <div className="column is-2">
             <PartnerAside />
           </div>
           <div className="column has-background-white-bis">
@@ -52,7 +53,7 @@ export const Log: React.FC<Props> = ({ bookingList }) => {
                         <td>
                           <input type="checkbox" />
                         </td>
-                        <td>{trip.name}</td>
+                        <td className="is-capitalized">{trip.name}</td>
                         <td>{route}</td>
                         <td>
                           {DatetimeLib.formatDateForDisplay(
@@ -92,8 +93,13 @@ export const getServerSideProps = (async ({ req }) => {
     },
   });
   console.log(result);
+  const result2 = result.sort((a, b) => {
+    const foo = a.BookedSeat[0].Seat.Trip.departureTime;
+    const bar = b.BookedSeat[0].Seat.Trip.departureTime;
+    return moment(bar).unix() - moment(foo).unix();
+  });
 
-  const bookingList = JSON.parse(JSON.stringify(result)) as typeof result;
+  const bookingList = JSON.parse(JSON.stringify(result2)) as typeof result;
   return {
     props: { bookingList },
   };

@@ -77,13 +77,13 @@ const Dashboard: FC<Props> = ({ bookingAndCancelCounts }) => {
       <PartnerNavbar />
       <div className="section p-0" style={{ height: "calc(100vh - 52px)" }}>
         <div className="columns m-0" style={{ height: "100%" }}>
-          <div className="column is-one-fifth">
+          <div className="column is-2">
             <PartnerAside />
           </div>
           <div className="column has-background-white-bis">
-            <div className="fixed-grid has-3-cols">
+            <div className="fixed-grid has-12-cols">
               <div className="grid">
-                <div className="cell">
+                <div className="cell is-col-span-4">
                   <div className="box">
                     <Pie
                       options={{
@@ -102,7 +102,7 @@ const Dashboard: FC<Props> = ({ bookingAndCancelCounts }) => {
                     />
                   </div>
                 </div>
-                <div className="cell is-col-span-2">
+                <div className="cell is-col-span-8">
                   <div className="box">
                     <Bar
                       options={{

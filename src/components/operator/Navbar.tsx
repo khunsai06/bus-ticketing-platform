@@ -22,6 +22,14 @@ const PartnerNavbar = () => {
           </a>
         </div>
         <div className="navbar-menu">
+          <div className="navbar-start">
+            <Link className="navbar-item" href={"/upload/toc.html"}>
+              Terms and Conditions
+            </Link>
+            <Link className="navbar-item" href={"/upload/pp.html"}>
+              Private Policy
+            </Link>
+          </div>
           <div className="navbar-end">
             {!foo && (
               <div className="navbar-item">

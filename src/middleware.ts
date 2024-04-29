@@ -29,6 +29,12 @@ export async function middleware(req: NextRequest) {
   const pathName = req.nextUrl.pathname;
   const response = NextResponse.next();
 
+  if (pathName === "/")
+    return NextResponse.redirect(new URL("/consumer", req.url));
+  if (pathName === "/operator")
+    return NextResponse.redirect(new URL("/operator/dash", req.url));
+  if (pathName === "/admin")
+    return NextResponse.redirect(new URL("/admin/dash", req.url));
   const isExcludedEndPoints = excludedEndPoints.some((path) =>
     pathName.startsWith(path)
   );

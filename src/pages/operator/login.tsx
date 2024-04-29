@@ -8,6 +8,7 @@ import { $Enums } from "@prisma/client";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import SimpleInput from "@/components/SimpleInput";
+import Link from "next/link";
 
 const Page = () => {
   const unameFieldCtrl = useField({
@@ -20,13 +21,13 @@ const Page = () => {
     zodSchema: requiredSchema,
   });
 
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      unameFieldCtrl.setMockValue("khunsai16104628");
-      passwdFieldCtrl.setMockValue("Zm46hkqbT8sw");
-      passwdFieldCtrl.validate();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (process.env.NODE_ENV === "development") {
+  //     unameFieldCtrl.setMockValue("khunsai16104628");
+  //     passwdFieldCtrl.setMockValue("Zm46hkqbT8sw");
+  //     passwdFieldCtrl.validate();
+  //   }
+  // }, []);
 
   const [isAnyFieldInvalid, setIsAnyFieldInvalid] = useState(true);
   useEffect(() => {
@@ -100,6 +101,11 @@ const Page = () => {
                 </button>
               </div>
             </form>
+            <hr />
+            <span>
+              Don't have an account?{" "}
+              <Link href="/operator/register">Register</Link>
+            </span>
           </div>
         </div>
       </section>

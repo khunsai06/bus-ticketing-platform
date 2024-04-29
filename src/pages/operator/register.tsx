@@ -146,6 +146,11 @@ const Registration = () => {
                 </button>
               </div>
             </form>
+            <hr />
+            <span>
+              Already have an account?{" "}
+              <Link href="/operator/login">Log in</Link>
+            </span>
           </div>
         </div>
       </section>

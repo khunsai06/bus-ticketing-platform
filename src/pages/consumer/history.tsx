@@ -45,8 +45,18 @@ const history: FC<Props> = ({ bookingList, refundTimeFrame }) => {
                         booking.bookedAt.toString(),
                         refundTimeFrame
                       );
-                    const left = `${hours} hours ${minutes} minutes left`;
-                    const left2 = `Time left for cancellation: ${hours} hours and ${minutes} minutes.`;
+                    const notValid =
+                      moment(booking.bookedAt).diff(
+                        moment().subtract(refundTimeFrame, "minutes")
+                      ) > 0;
+                    let left = "";
+                    if (notValid) {
+                      left = `Time left for cancellation: ${hours} hours and ${minutes} minutes.`;
+                    }
+
+                    // !!moment(
+                    //   booking.BookedSeat[0].Seat.Trip.departureTime
+                    // ).diff(moment())
                     return (
                       <div className="cell" key={i}>
                         <div
@@ -83,12 +93,11 @@ const history: FC<Props> = ({ bookingList, refundTimeFrame }) => {
                               seatList.map((seat) => seat.number)
                             )}
                           />
-                          {moment(booking.bookedAt).minutes() > 0 &&
-                            !booking.isCanceled && (
-                              <article className="message is-danger">
-                                <div className="message-body">{left2}</div>
-                              </article>
-                            )}
+                          {notValid && !booking.isCanceled && (
+                            <article className="message is-danger">
+                              <div className="message-body">{left}</div>
+                            </article>
+                          )}
                         </div>
                       </div>
                     );

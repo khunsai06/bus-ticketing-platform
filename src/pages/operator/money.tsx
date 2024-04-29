@@ -89,7 +89,7 @@ const Money: FC<Props> = ({ bookingList }) => {
       <PartnerNavbar />
       <div className="section p-0" style={{ height: "calc(100vh - 52px)" }}>
         <div className="columns m-0" style={{ height: "100%" }}>
-          <div className="column is-one-fifth">
+          <div className="column is-2">
             <PartnerAside />
           </div>
           <div className="column has-background-white-bis">

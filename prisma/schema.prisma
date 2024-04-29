@@ -17,13 +17,14 @@ enum UserType {
 }
 
 model Credential {
-  id       String    @id @default(cuid())
-  uname    String?   @unique
-  email    String?   @unique
-  passwd   String
-  userType UserType
-  Consumer Consumer?
-  Operator Operator?
+  id        String    @id @default(cuid())
+  uname     String?   @unique
+  email     String?   @unique
+  passwd    String
+  userType  UserType
+  Consumer  Consumer?
+  Operator  Operator?
+  createdAt DateTime  @default(now())
 
   @@map("credentials")
 }

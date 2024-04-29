@@ -105,6 +105,7 @@ const SeatEntryDialog: React.FC<Props> = ({
               value={seatFeatsFieldCtrl.value}
               onChange={seatFeatsFieldCtrl.onChange}
               onFocus={seatFeatsFieldCtrl.onFocus}
+              cols={0}
             />
             <SimpleTextArea
               label="Additional"
@@ -112,6 +113,7 @@ const SeatEntryDialog: React.FC<Props> = ({
               value={seatAddlFieldCtrl.value}
               onChange={seatAddlFieldCtrl.onChange}
               onFocus={seatAddlFieldCtrl.onFocus}
+              cols={0}
             />
           </div>
           <div className="modal-card-foot">

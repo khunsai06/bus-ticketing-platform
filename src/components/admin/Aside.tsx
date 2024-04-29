@@ -4,33 +4,42 @@ import React from "react";
 
 const AdminAside = () => {
   const rt = useRouter();
-  console.log(rt.pathname);
-  console.log(rt.query);
 
   return (
     <aside className="menu">
       <p className="menu-label">General</p>
       <ul className="menu-list">
         <li>
-          <Link href={"/admin/dash"}>Dashboard</Link>
+          <Link
+            href={"/admin/dash"}
+            className={rt.pathname === "/admin/dash" ? "is-active" : ""}
+          >
+            Dashboard
+          </Link>
         </li>
         <li>
-          <Link href={"/admin/apps"}>Applications</Link>
+          <Link
+            href={"/admin/apps"}
+            className={rt.pathname === "/admin/apps" ? "is-active" : ""}
+          >
+            Applications
+          </Link>
         </li>
         <li>
-          <a>Users</a>
-        </li>
-      </ul>
-      <p className="menu-label">Transactions</p>
-      <ul className="menu-list">
-        <li>
-          <a>Payments</a>
-        </li>
-        <li>
-          <a>Transfers</a>
+          <Link
+            href={"/admin/users"}
+            className={rt.pathname === "/admin/users" ? "is-active" : ""}
+          >
+            Users Management
+          </Link>
         </li>
         <li>
-          <a>Balance</a>
+          <Link
+            href={"/admin/setting"}
+            className={rt.pathname === "/admin/setting" ? "is-active" : ""}
+          >
+            Settings
+          </Link>
         </li>
       </ul>
     </aside>

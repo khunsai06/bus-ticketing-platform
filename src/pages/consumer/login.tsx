@@ -2,7 +2,12 @@ import ConsumerNavbar from "@/components/consumer/Navbar";
 import useField from "@/hooks/useField";
 import Notification2 from "@/components/common/Notification";
 import { UtilLib } from "@/lib/util";
-import { emailSchema, passwdSchema, unameSchema } from "@/lib/zod-schema";
+import {
+  emailSchema,
+  passwdSchema,
+  requiredSchema,
+  unameSchema,
+} from "@/lib/zod-schema";
 import { Auth } from "@/services/auth";
 import { $Enums } from "@prisma/client";
 import Link from "next/link";
@@ -18,15 +23,15 @@ const ConsumerLoginPage = () => {
 
   const passwdFieldCtrl = useField({
     initialValue: "",
-    zodSchema: passwdSchema,
+    zodSchema: requiredSchema,
   });
 
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      emailFieldCtrl.setMockValue("foo@foo.com");
-      passwdFieldCtrl.setMockValue("sixtyNine69)^");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (process.env.NODE_ENV === "development") {
+  //     emailFieldCtrl.setMockValue("foo@foo.com");
+  //     passwdFieldCtrl.setMockValue("sixtyNine69)^");
+  //   }
+  // }, []);
 
   const [isAnyFieldInvalid, setIsAnyFieldInvalid] = useState(true);
   useEffect(() => {

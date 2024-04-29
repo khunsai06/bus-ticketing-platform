@@ -14,6 +14,7 @@ CREATE TABLE "credentials" (
     "email" TEXT,
     "passwd" TEXT NOT NULL,
     "userType" "UserType" NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "credentials_pkey" PRIMARY KEY ("id")
 );
@@ -121,18 +122,6 @@ CREATE TABLE "settings" (
     CONSTRAINT "settings_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "payout_requests" (
-    "id" TEXT NOT NULL,
-    "isPaid" BOOLEAN NOT NULL DEFAULT false,
-    "amount" MONEY NOT NULL,
-    "requestedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "paidAt" TIMESTAMP(3) NOT NULL,
-    "operatorId" TEXT NOT NULL,
-
-    CONSTRAINT "payout_requests_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "credentials_uname_key" ON "credentials"("uname");
 
@@ -171,6 +160,3 @@ ALTER TABLE "BookedSeat" ADD CONSTRAINT "BookedSeat_bookingId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_consumerId_fkey" FOREIGN KEY ("consumerId") REFERENCES "consumers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "payout_requests" ADD CONSTRAINT "payout_requests_operatorId_fkey" FOREIGN KEY ("operatorId") REFERENCES "operators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
