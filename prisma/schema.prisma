@@ -49,6 +49,8 @@ model Application {
   companyEmail String
   files        String[]
   createdAt    DateTime @default(now())
+
+  @@map("applications")
 }
 
 model Operator {

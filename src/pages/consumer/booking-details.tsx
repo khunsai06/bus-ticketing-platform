@@ -29,6 +29,10 @@ const PaymentPage: React.FC<Props> = ({ booking, refundTimeFrame }) => {
     booking.bookedAt.toString(),
     refundTimeFrame
   );
+  const notValid =
+    moment(booking.bookedAt).diff(
+      moment().subtract(refundTimeFrame, "minutes")
+    ) > 0;
   const left = `${hours} hours ${minutes} minutes left`;
   const left2 = `Time left for cancellation: ${hours} hours and ${minutes} minutes.`;
   const rt = useRouter();
@@ -130,25 +134,24 @@ const PaymentPage: React.FC<Props> = ({ booking, refundTimeFrame }) => {
                     </span>
                   </div>
                 </section>
-                {moment(booking.bookedAt).minutes() > 0 &&
-                  !booking.isCanceled && (
-                    <>
-                      <article className="message is-danger">
-                        <div className="message-body">{left2}</div>
-                      </article>
-                      <div className="buttons is-centered">
-                        <button
-                          className="button is-danger has-text-danger-100"
-                          onClick={cancelBooking}
-                        >
-                          <span className="icon">
-                            <Icon path={mdiCancel} size={"1.125rem"} />
-                          </span>
-                          <span>Cancel Booking</span>
-                        </button>
-                      </div>
-                    </>
-                  )}
+                {notValid && !booking.isCanceled && (
+                  <>
+                    <article className="message is-danger">
+                      <div className="message-body">{left2}</div>
+                    </article>
+                    <div className="buttons is-centered">
+                      <button
+                        className="button is-danger has-text-danger-100"
+                        onClick={cancelBooking}
+                      >
+                        <span className="icon">
+                          <Icon path={mdiCancel} size={"1.125rem"} />
+                        </span>
+                        <span>Cancel Booking</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

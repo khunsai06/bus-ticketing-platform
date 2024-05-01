@@ -80,7 +80,7 @@ export const getServerSideProps = (async ({ req }) => {
     const sessionData = AuthLib.getSessionData(sessionCookie);
     const result = await prisma.trip.findMany({
       where: { operatorId: sessionData.operatorId },
-      orderBy: { departureTime: "desc" },
+      orderBy: { id: "desc" },
     });
     return { props: { trips: JSON.parse(JSON.stringify(result)) } };
   } catch (error) {

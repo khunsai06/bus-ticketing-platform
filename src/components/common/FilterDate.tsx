@@ -6,7 +6,7 @@ type Props = {
   min?: moment.Moment;
   value?: moment.Moment;
   defaultValue?: moment.Moment;
-  onChange?: React.ChangeEventHandler<Element>;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
 };
 const FilterDate: React.FC<Props> = ({
   icon,

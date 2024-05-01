@@ -43,10 +43,10 @@ const ConsumerNavbar = () => {
         </div>
         <div className={"navbar-menu".concat(openMenu ? " is-active" : "")}>
           <div className="navbar-start">
-            <Link className="navbar-item" href={"/upload/toc.html"}>
+            <Link className="navbar-item" href={"/uploads/toc.html"}>
               Terms and Conditions
             </Link>
-            <Link className="navbar-item" href={"/upload/pp.html"}>
+            <Link className="navbar-item" href={"/uploads/pp.html"}>
               Private Policy
             </Link>
           </div>

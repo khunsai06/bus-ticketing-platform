@@ -8,11 +8,11 @@ const consumerId = "qrstuvwxyzaabbccd";
 const prisma = new PrismaClient();
 async function main() {
   await init();
-  await generateTrips(100, operatorId, "past", "LAUNCHED");
+  await generateTrips(20, operatorId, "past", "LAUNCHED");
   await generateTrips(5, operatorId, "future", "IDLE");
   await generateTrips(5, operatorId, "future", "LAUNCHED");
-  await generateOperators(10);
-  await generateConsumers(100);
+  await generateOperators(5);
+  await generateConsumers(20);
   const tripList = await prisma.trip.findMany({ where: { operatorId } });
   tripList.forEach(async (trip) => {
     await makeBooking(consumerId, trip.id);
@@ -98,6 +98,7 @@ async function generateConsumers(count: number) {
     });
   }
 }
+
 async function generateOperators(count: number) {
   for (let i = 0; i < count; i++) {
     const companyName = faker.company.name() + i;

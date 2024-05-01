@@ -3,9 +3,9 @@ import React from "react";
 type Props = {
   label: string;
   icon: React.ReactNode;
-  optionList: { value: string | number | readonly string[]; option: string }[];
+  optionList: string[];
   value?: string | number | readonly string[];
-  onChange?: React.FormEventHandler<Element>;
+  onChange?: React.FormEventHandler<HTMLSelectElement>;
 };
 
 const FilterSelectable: React.FC<Props> = ({
@@ -26,9 +26,9 @@ const FilterSelectable: React.FC<Props> = ({
       <div className="control">
         <div className="select">
           <select value={value} onChange={onChange}>
-            {optionList.map(({ value, option }, index) => (
-              <option key={index} value={value}>
-                {option}
+            {optionList.map((val, index) => (
+              <option className="is-capitalized" key={index} value={val}>
+                {val}
               </option>
             ))}
           </select>

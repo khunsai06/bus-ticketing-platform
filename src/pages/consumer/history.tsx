@@ -72,6 +72,9 @@ const history: FC<Props> = ({ bookingList, refundTimeFrame }) => {
                               <span className="tag is-link is-light">
                                 {booking.isCanceled ? "Canceled" : "Booked"}
                               </span>
+                              <span className="tag is-link is-light">
+                                {bookedAt}
+                              </span>
                             </div>
                           </div>
                           <LabelValueDisplay
@@ -83,10 +86,10 @@ const history: FC<Props> = ({ bookingList, refundTimeFrame }) => {
                             label={"Depart at"}
                             value={depTime}
                           />
-                          <LabelValueDisplay
+                          {/* <LabelValueDisplay
                             label={"Booked at"}
                             value={bookedAt}
-                          />
+                          /> */}
                           <LabelValueDisplay
                             label={"Seat are"}
                             value={UtilLib.toString3(

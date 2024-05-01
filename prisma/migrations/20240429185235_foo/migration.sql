@@ -32,14 +32,14 @@ CREATE TABLE "consumers" (
 );
 
 -- CreateTable
-CREATE TABLE "Application" (
+CREATE TABLE "applications" (
     "id" TEXT NOT NULL,
     "companyName" TEXT NOT NULL,
     "companyEmail" TEXT NOT NULL,
     "files" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "Application_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "applications_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable

@@ -22,10 +22,10 @@ const AdminNavbar = () => {
         </div>
         <div className="navbar-menu">
           <div className="navbar-start">
-            <Link className="navbar-item" href={"/upload/toc.html"}>
+            <Link className="navbar-item" href={"/uploads/toc.html"}>
               Terms and Conditions
             </Link>
-            <Link className="navbar-item" href={"/upload/pp.html"}>
+            <Link className="navbar-item" href={"/uploads/pp.html"}>
               Private Policy
             </Link>
           </div>

@@ -17,6 +17,7 @@ import prisma from "@/lib/prisma-client";
 import moment from "moment";
 import { Booking } from "@prisma/client";
 import { isArray } from "util";
+import { getCookie } from "cookies-next";
 
 ChartJS.register(
   CategoryScale,
@@ -43,6 +44,8 @@ export const options = {
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
 const Money: FC<Props> = ({ bookingList }) => {
+  console.log(bookingList);
+
   let totalSale = 0;
   let revenue = 0;
   let totalComm = 0;
@@ -148,14 +151,19 @@ const Money: FC<Props> = ({ bookingList }) => {
 };
 export default Money;
 
-export const getServerSideProps = (async (ctx) => {
+export const getServerSideProps = (async ({ req }) => {
+  const operatorId = getCookie("operatorId", { req });
+  console.log(operatorId);
+
   const result = await prisma.booking.findMany({
-    where: { isCanceled: false },
+    where: {
+      isCanceled: false,
+      BookedSeat: { some: { Seat: { Trip: { operatorId } } } },
+    },
     orderBy: { bookedAt: "desc" },
   });
   const bookingList = JSON.parse(JSON.stringify(result)) as typeof result;
   console.log(bookingList);
-
   return { props: { bookingList } };
 }) satisfies GetServerSideProps<{}>;
 
