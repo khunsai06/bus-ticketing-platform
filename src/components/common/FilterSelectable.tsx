@@ -26,6 +26,7 @@ const FilterSelectable: React.FC<Props> = ({
       <div className="control">
         <div className="select">
           <select value={value} onChange={onChange}>
+            <option value="">None</option>
             {optionList.map((val, index) => (
               <option className="is-capitalized" key={index} value={val}>
                 {val}

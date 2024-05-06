@@ -11,8 +11,8 @@ async function main() {
   await generateTrips(20, operatorId, "past", "LAUNCHED");
   await generateTrips(5, operatorId, "future", "IDLE");
   await generateTrips(5, operatorId, "future", "LAUNCHED");
-  await generateOperators(5);
-  await generateConsumers(20);
+  await generateOperators(3);
+  await generateConsumers(10);
   const tripList = await prisma.trip.findMany({ where: { operatorId } });
   tripList.forEach(async (trip) => {
     await makeBooking(consumerId, trip.id);
@@ -139,9 +139,11 @@ async function generateTrips(
     await prisma.trip.create({
       data: {
         name: faker.lorem.word(),
-        departureLocation: faker.location.city(),
+        departureLocation: faker.helpers.arrayElement(cities),
+        distance: faker.number.float({ min: 100, max: 500 }),
+        amenities: faker.helpers.arrayElements(amenities, { min: 3, max: 6 }),
         departureTime: depDate,
-        arrivalLocation: faker.location.city(),
+        arrivalLocation: faker.helpers.arrayElement(cities),
         arrivalTime: arrDate.toDate(),
         price: faker.finance.amount({ min: 10000, max: 50000 }),
         operatorId: operatorId,
@@ -149,7 +151,11 @@ async function generateTrips(
         Seats: {
           createMany: {
             data: Array.from({ length: maxSeatLength }, (_, i) => ({
-              number: (i + 1).toString(),
+              number: i.toString(),
+              location: faker.helpers.arrayElements(seatLocList, {
+                min: 1,
+                max: 1,
+              }),
             })),
           },
         },
@@ -181,3 +187,77 @@ async function makeBooking(consumerId: string, tripId: string) {
     data: { status: $Enums.SeatStatus.BOOKED },
   });
 }
+
+const amenities: string[] = [
+  "Comfortable seating",
+  "Air conditioning/Heating",
+  "Wi-Fi",
+  "Power outlets",
+  "Onboard restroom",
+  "Overhead storage",
+  "Undercarriage storage",
+  "Entertainment systems",
+  "Onboard catering",
+  "Seatback trays",
+  "Reading lights",
+  "Wheelchair accessibility",
+  "GPS tracking",
+  "Blankets and pillows",
+  "Security cameras",
+  "Friendly staff",
+];
+
+const cities: string[] = [
+  "Yangon",
+  "Mandalay",
+  "Naypyidaw",
+  "Bagan",
+  "Taunggyi",
+  "Pyay",
+  "Mawlamyine",
+  "Sittwe",
+  "Pathein",
+  "Myeik",
+  "Dawei",
+  "Hpa-An",
+  "Magway",
+  "Pakokku",
+  "Monywa",
+  "Loikaw",
+  "Kalay",
+  "Meiktila",
+  "Thayet",
+  "Kyaukse",
+  "Sagaing",
+  "Mawlamyinegyun",
+  "Bogale",
+  "Hinthada",
+  "Chauk",
+  "Lashio",
+  "Pyin Oo Lwin",
+  "Thanlyin",
+  "Thaton",
+  "Yenangyaung",
+  "Yeoju",
+  "Ye",
+  "Taungoo",
+  "Nyaung-U",
+  "Myitkyina",
+  "Kyaukpyu",
+  "Namtu",
+  "Mohnyin",
+  "Maubin",
+  "Meiktila",
+];
+
+const seatLocList: string[] = [
+  "Front",
+  "Middle",
+  "Back",
+  "Window",
+  "Aisle",
+  "Near restroom",
+  "Near exit",
+  "Upper deck",
+  "Lower deck",
+];

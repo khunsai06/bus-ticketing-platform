@@ -18,14 +18,12 @@ import { isString } from "util";
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
 
-const ConsumerTripListPage: React.FC<Props> = ({ trips }) => {
+const ConsumerTripListPage: React.FC<Props> = ({
+  tripList,
+  depLocList,
+  arrLocList,
+}) => {
   const rt = useRouter();
-  const depLocList = trips.map((t) => t.departureLocation);
-  depLocList.sort();
-  depLocList.unshift("None");
-  const arrLocList = trips.map((t) => t.arrivalLocation);
-  arrLocList.sort();
-  arrLocList.unshift("None");
   const [depLocFil, setDepLocFil] = useState("");
   const [arrLocFil, setArrLocFil] = useState("");
   const [depT, setDepT] = useState("");
@@ -42,13 +40,13 @@ const ConsumerTripListPage: React.FC<Props> = ({ trips }) => {
       <section className="section">
         <div className="field is-grouped is-flex-wrap-wrap">
           <FilterSelectable
-            optionList={depLocList}
+            optionList={Array.from(new Set(depLocList))}
             label="From"
             icon={<Icon path={mdiMapMarker} size="1.125rem" />}
             onChange={(e) => setDepLocFil(e.currentTarget.value)}
           />
           <FilterSelectable
-            optionList={arrLocList}
+            optionList={Array.from(new Set(arrLocList))}
             label="To"
             icon={<Icon path={mdiMapMarker} size="1.125rem" />}
             onChange={(e) => setArrLocFil(e.currentTarget.value)}
@@ -61,7 +59,7 @@ const ConsumerTripListPage: React.FC<Props> = ({ trips }) => {
           />
         </div>
         <ul>
-          {trips.map((trip, index) => (
+          {tripList.map((trip, index) => (
             <ConsumerTripItem key={index} trip={trip} />
           ))}
         </ul>
@@ -75,19 +73,46 @@ export default ConsumerTripListPage;
 
 export const getServerSideProps = (async ({ query }) => {
   const filterCtx = query.filterCtx;
+  const filters = { depLocFil: "", arrLocFil: "", depT: "" };
   if (isString(filterCtx)) {
-    const filters = UtilLib.decodeContext(filterCtx);
-    console.log(filters);
+    const decoded = UtilLib.decodeContext(filterCtx);
+    filters.depLocFil = decoded.depLocFil;
+    filters.arrLocFil = decoded.arrLocFil;
+    filters.depT = decoded.depT;
   }
 
   try {
+    const startDate = new Date(filters.depT);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 1);
+    const depLocList = (await prisma.trip.findMany({}))
+      .map((t) => t.departureLocation)
+      .sort();
+    const arrLocList = (await prisma.trip.findMany({}))
+      .map((t) => t.arrivalLocation)
+      .sort();
     const result = await prisma.trip.findMany({
-      where: { status: "LAUNCHED" },
+      where: {
+        status: "LAUNCHED",
+        departureTime: {
+          gte: moment().toDate(),
+        },
+        ...(filters.depLocFil !== "" && {
+          departureLocation: filters.depLocFil,
+        }),
+        ...(filters.arrLocFil !== "" && {
+          arrivalLocation: filters.arrLocFil,
+        }),
+        ...(filters.depT !== "" && {
+          departureTime: { gte: startDate, lt: endDate },
+        }),
+      },
       include: { Operator: true, Seats: true },
     });
-    const trips = JSON.parse(JSON.stringify(result)) as Trip4[];
-    return { props: { trips } };
+    const tripList = JSON.parse(JSON.stringify(result)) as Trip4[];
+    return { props: { tripList, depLocList, arrLocList } };
   } catch (error) {
     return { notFound: true };
   }
-}) satisfies GetServerSideProps<{ trips: Trip4[] }>;
+}) satisfies GetServerSideProps<{}>;
