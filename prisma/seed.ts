@@ -46,7 +46,7 @@ async function init() {
   await prisma.operator.create({
     data: {
       id: operatorId,
-      name: "Operator",
+      name: "Foo Operator",
       registrationEmail: "operator@foo.mm",
       Credential: {
         create: {
@@ -60,7 +60,7 @@ async function init() {
   await prisma.consumer.create({
     data: {
       id: consumerId,
-      name: "consumer",
+      name: "John Doe",
       dob: moment().subtract(24, "years").toDate(),
       gender: "male",
       phone: "1234567890",
@@ -151,7 +151,9 @@ async function generateTrips(
         Seats: {
           createMany: {
             data: Array.from({ length: maxSeatLength }, (_, i) => ({
-              number: i.toString(),
+              number: faker.random
+                .alpha({ count: 1, casing: "upper" })
+                .concat((i + 1).toString()),
               location: faker.helpers.arrayElements(seatLocList, {
                 min: 1,
                 max: 1,

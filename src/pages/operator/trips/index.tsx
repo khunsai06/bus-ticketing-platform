@@ -14,15 +14,20 @@ import PartnerAside from "@/components/operator/Aside";
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
 
-const TripsPage: FC<Props> = ({ trips }) => {
-  const [tripList, setTripList] = useState<Trip2[]>(trips);
+const TripsPage: FC<Props> = ({ tripList, tripListLength }) => {
+  const rt = useRouter();
+  const [pageNumber, setPageNumber] = useState(1);
+  useEffect(() => {
+    rt.push({ query: { pageNumber } });
+  }, [pageNumber]);
+  console.log(tripListLength);
 
   return (
     <>
       <Link
         className="button is-link is-large"
         href={"/operator/trips/entry"}
-        style={{ position: "fixed", zIndex: 100, right: 48, bottom: 48 }}
+        style={{ position: "fixed", zIndex: 100, right: 48, bottom: 120 }}
       >
         <span className="icon">
           <Icon path={mdiPlus} size={1} />
@@ -35,15 +40,7 @@ const TripsPage: FC<Props> = ({ trips }) => {
             <PartnerAside />
           </div>
           <main className="column has-background-white-bis">
-            {/* <div className="field">
-              <Link className="button is-link" href={"/operator/trips/entry"}>
-                <span className="icon">
-                  <Icon path={mdiPlus} size={1} />
-                </span>
-                <span>Add New Trip</span>
-              </Link>
-            </div> */}
-            <div className="table-container box is-radiusless">
+            <div className="table-container card is-radiusless">
               <table className="table is-fullwidth">
                 <thead>
                   <tr>
@@ -65,6 +62,28 @@ const TripsPage: FC<Props> = ({ trips }) => {
                 </tbody>
               </table>
             </div>
+            <nav className="pagination is-centered" role="navigation">
+              <ul className="pagination-list">
+                {Array.from({ length: Math.ceil(tripListLength / 14) }).map(
+                  (_, i) => {
+                    const currentPageNumb = i + 1;
+                    return (
+                      <li key={i}>
+                        <button
+                          onClick={() => setPageNumber(currentPageNumb)}
+                          className={"pagination-link".concat(
+                            " ",
+                            pageNumber === currentPageNumb ? "is-current" : ""
+                          )}
+                        >
+                          {i + 1}
+                        </button>
+                      </li>
+                    );
+                  }
+                )}
+              </ul>
+            </nav>
           </main>
         </div>
       </div>
@@ -74,23 +93,34 @@ const TripsPage: FC<Props> = ({ trips }) => {
 
 export default TripsPage;
 
-export const getServerSideProps = (async ({ req }) => {
+export const getServerSideProps = (async ({ req, query }) => {
   try {
+    const pageNumber = query.pageNumber;
+    if (!isString(pageNumber)) return { notFound: true };
+    const tripListLength = await prisma.trip.count();
     const sessionCookie = getCookie(OPERATOR_SESSION_COOKIE_NAME, { req })!;
     const sessionData = AuthLib.getSessionData(sessionCookie);
     const result = await prisma.trip.findMany({
       where: { operatorId: sessionData.operatorId },
       orderBy: { id: "desc" },
+      skip: (parseInt(pageNumber) - 1) * 14,
+      take: 14,
     });
-    return { props: { trips: JSON.parse(JSON.stringify(result)) } };
+    return {
+      props: {
+        tripList: JSON.parse(JSON.stringify(result)) as Trip2[],
+        tripListLength,
+      },
+    };
   } catch (error) {
     return { notFound: true };
   }
-}) satisfies GetServerSideProps<{ trips: Trip2[] }>;
+}) satisfies GetServerSideProps<{}>;
 
 import { DatetimeLib } from "@/lib/datetime";
 import { useRouter } from "next/router";
 import Pagination from "@/components/Pagination";
+import { isString } from "util";
 
 const TripItem2: FC<{ trip: Trip2 }> = ({ trip }) => {
   const rt = useRouter();

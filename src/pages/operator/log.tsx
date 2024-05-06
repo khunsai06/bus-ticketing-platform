@@ -1,17 +1,26 @@
+import FilterSelectable from "@/components/common/FilterSelectable";
 import PartnerAside from "@/components/operator/Aside";
 import PartnerNavbar from "@/components/operator/Navbar";
 import { DatetimeLib } from "@/lib/datetime";
 import prisma from "@/lib/prisma-client";
 import { UtilLib } from "@/lib/util";
+import { mdiMapMarker } from "@mdi/js";
+import Icon from "@mdi/react";
 import { getCookie } from "cookies-next";
 import moment from "moment";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import React from "react";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { isString } from "util";
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
-export const Log: React.FC<Props> = ({ bookingList }) => {
-  console.log(bookingList);
+export const Log: React.FC<Props> = ({ bookingList, bookingListLength }) => {
+  const rt = useRouter();
+  const [pageNumber, setPageNumber] = useState(1);
+  useEffect(() => {
+    rt.push({ query: { pageNumber } });
+  }, [pageNumber]);
 
   return (
     <>
@@ -23,7 +32,7 @@ export const Log: React.FC<Props> = ({ bookingList }) => {
           </div>
           <div className="column has-background-white-bis">
             <div className="table-container card is-radiusless">
-              <table className="table is-fullwidth is-hoverable">
+              <table className="table is-fullwidth">
                 <thead>
                   <tr>
                     <th>
@@ -38,7 +47,7 @@ export const Log: React.FC<Props> = ({ bookingList }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookingList.map((booking) => {
+                  {bookingList.map((booking, i) => {
                     const trip = booking.BookedSeat[0].Seat.Trip;
                     const seatNumbers = booking.BookedSeat.map(
                       (bs) => bs.Seat.number
@@ -49,7 +58,7 @@ export const Log: React.FC<Props> = ({ bookingList }) => {
                       trip.arrivalLocation
                     );
                     return (
-                      <tr>
+                      <tr key={i}>
                         <td>
                           <input type="checkbox" />
                         </td>
@@ -73,6 +82,28 @@ export const Log: React.FC<Props> = ({ bookingList }) => {
                 </tbody>
               </table>
             </div>
+            <nav className="pagination is-centered" role="navigation">
+              <ul className="pagination-list">
+                {Array.from({ length: Math.ceil(bookingListLength / 14) }).map(
+                  (_, i) => {
+                    const currentPageNumb = i + 1;
+                    return (
+                      <li key={i}>
+                        <button
+                          onClick={() => setPageNumber(currentPageNumb)}
+                          className={"pagination-link".concat(
+                            " ",
+                            pageNumber === currentPageNumb ? "is-current" : ""
+                          )}
+                        >
+                          {i + 1}
+                        </button>
+                      </li>
+                    );
+                  }
+                )}
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
@@ -82,25 +113,29 @@ export const Log: React.FC<Props> = ({ bookingList }) => {
 
 export default Log;
 
-export const getServerSideProps = (async ({ req }) => {
+export const getServerSideProps = (async ({ req, query }) => {
   const operatorId = getCookie("operatorId", { req });
+  const pageNumber = query.pageNumber;
   if (!isString(operatorId)) return { notFound: true };
+  if (!isString(pageNumber)) return { notFound: true };
+
+  const bookingListLength = await prisma.booking.count();
   const result = await prisma.booking.findMany({
     where: { BookedSeat: { some: { Seat: { Trip: { operatorId } } } } },
     include: {
       Consumer: true,
       BookedSeat: { include: { Seat: { include: { Trip: true } } } },
     },
+    skip: (parseInt(pageNumber) - 1) * 14,
+    take: 14,
   });
-  console.log(result);
   const result2 = result.sort((a, b) => {
     const foo = a.BookedSeat[0].Seat.Trip.departureTime;
     const bar = b.BookedSeat[0].Seat.Trip.departureTime;
     return moment(bar).unix() - moment(foo).unix();
   });
-
   const bookingList = JSON.parse(JSON.stringify(result2)) as typeof result;
   return {
-    props: { bookingList },
+    props: { bookingList, bookingListLength },
   };
 }) satisfies GetServerSideProps<{}>;

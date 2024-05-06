@@ -27,7 +27,7 @@ const AdminAside = () => {
         </li>
         <li>
           <Link
-            href={"/admin/users"}
+            href={"/admin/users?pageNumber=1"}
             className={rt.pathname === "/admin/users" ? "is-active" : ""}
           >
             Users Management

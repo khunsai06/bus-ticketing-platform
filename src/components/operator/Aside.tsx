@@ -24,7 +24,7 @@ const PartnerAside = () => {
             className={
               rt.pathname.includes("/operator/trips") ? "is-active" : ""
             }
-            href={"/operator/trips"}
+            href={"/operator/trips?pageNumber=1"}
           >
             Route Management
           </Link>
@@ -32,7 +32,7 @@ const PartnerAside = () => {
         <li>
           <Link
             className={rt.pathname === "/operator/log" ? "is-active" : ""}
-            href={"/operator/log"}
+            href={"/operator/log?pageNumber=1"}
           >
             Booking Log
           </Link>

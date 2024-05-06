@@ -113,19 +113,25 @@ const Dashboard: FC<Props> = ({
                 <div className="cell is-col-span-4">
                   <div className="box">
                     <div className="field">
-                      <span className="is-block">Total Consumer Count</span>
+                      <span className="is-block has-text-weight-medium">
+                        Total Consumer Count
+                      </span>
                       <span className="is-size-4 has-text-success-50 has-text-weight-medium">
                         <span>{consumerCount}</span>
                       </span>
                     </div>
                     <div className="field">
-                      <span className="is-block">Total Partner Count</span>
+                      <span className="is-block has-text-weight-medium">
+                        Total Partner Count
+                      </span>
                       <span className="is-size-4 has-text-success-50 has-text-weight-medium">
                         <span>{partnerCount}</span>
                       </span>
                     </div>
                     <div className="field">
-                      <span className="is-block">Pending Applications</span>
+                      <span className="is-block has-text-weight-medium">
+                        Pending Applications
+                      </span>
                       <span className="is-size-4 has-text-danger-50 has-text-weight-medium">
                         <span>{appCount}</span>
                       </span>
@@ -162,7 +168,6 @@ export const getServerSideProps = (async (ctx) => {
   const result3 = await prisma.application.findMany();
   const operatorData = groupItemByMonth(result1);
   const consumerData = groupItemByMonth(result2);
-  console.log({ operatorData, consumerData });
   const consumerCount = result1.length;
   const partnerCount = result2.length;
   const appCount = result3.length;

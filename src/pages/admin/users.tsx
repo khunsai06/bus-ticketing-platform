@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import AdminNavbar from "@/components/admin/Navbar";
 import AdminAside from "@/components/admin/Aside";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -11,9 +11,15 @@ import useSwitch from "@/hooks/useSwitch";
 import { useRouter } from "next/router";
 import { Credential } from "@prisma/client";
 import { HttpVerb } from "@/constants";
+import { isString } from "util";
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
-const Dashboard: FC<Props> = ({ userList }) => {
+const Dashboard: FC<Props> = ({ userList, userListLength }) => {
+  const [pageNumber, setPageNumber] = useState(1);
+  useEffect(() => {
+    rt.push({ query: { pageNumber } });
+  }, [pageNumber]);
+
   const dialogSwitch = useSwitch();
   const rt = useRouter();
   const refresh = () => rt.reload();
@@ -120,6 +126,28 @@ const Dashboard: FC<Props> = ({ userList }) => {
                 </tbody>
               </table>
             </div>
+            <nav className="pagination is-centered" role="navigation">
+              <ul className="pagination-list">
+                {Array.from({ length: Math.ceil(userListLength / 14) }).map(
+                  (_, i) => {
+                    const currentPageNumb = i + 1;
+                    return (
+                      <li key={i}>
+                        <button
+                          onClick={() => setPageNumber(currentPageNumb)}
+                          className={"pagination-link".concat(
+                            " ",
+                            pageNumber === currentPageNumb ? "is-current" : ""
+                          )}
+                        >
+                          {i + 1}
+                        </button>
+                      </li>
+                    );
+                  }
+                )}
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
@@ -128,10 +156,17 @@ const Dashboard: FC<Props> = ({ userList }) => {
 };
 export default Dashboard;
 
-export const getServerSideProps = (async (ctx) => {
-  const result = await prisma.credential.findMany();
+export const getServerSideProps = (async ({ query }) => {
+  const pageNumber = query.pageNumber;
+  if (!isString(pageNumber)) return { notFound: true };
+  const userListLength = await prisma.credential.count();
+  const result = await prisma.credential.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 12,
+    skip: (parseInt(pageNumber) - 1) * 12,
+  });
   const userList = JSON.parse(JSON.stringify(result)) as typeof result;
   return {
-    props: { userList },
+    props: { userList, userListLength },
   };
 }) satisfies GetServerSideProps<{}>;

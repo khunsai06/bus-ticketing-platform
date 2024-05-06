@@ -44,8 +44,6 @@ export const options = {
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
 const Money: FC<Props> = ({ bookingList }) => {
-  console.log(bookingList);
-
   let totalSale = 0;
   let revenue = 0;
   let totalComm = 0;
@@ -153,7 +151,6 @@ export default Money;
 
 export const getServerSideProps = (async ({ req }) => {
   const operatorId = getCookie("operatorId", { req });
-  console.log(operatorId);
 
   const result = await prisma.booking.findMany({
     where: {
@@ -163,7 +160,6 @@ export const getServerSideProps = (async ({ req }) => {
     orderBy: { bookedAt: "desc" },
   });
   const bookingList = JSON.parse(JSON.stringify(result)) as typeof result;
-  console.log(bookingList);
   return { props: { bookingList } };
 }) satisfies GetServerSideProps<{}>;
 
